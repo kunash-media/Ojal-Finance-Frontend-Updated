@@ -1,0 +1,190 @@
+/* UserList.css - Responsive styles only */
+
+/* Container responsive adjustments */
+.user-list-container {
+  padding: 1rem;
+}
+
+/* Mobile-first responsive adjustments */
+@media (max-width: 640px) {
+  .user-list-container {
+    padding: 0.5rem;
+  }
+  
+  /* Adjust table for mobile */
+  .user-list-container table {
+    font-size: 0.875rem;
+  }
+  
+  .user-list-container th,
+  .user-list-container td {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  /* Profile modal adjustments for mobile */
+  .profile-modal {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    max-height: calc(100vh - 2rem);
+  }
+  
+  .profile-modal .grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  .profile-modal h3 {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 768px) {
+  /* Stack search and filter on smaller screens */
+  .user-list-container .search-filter-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .user-list-container .search-filter-container > div {
+    width: 100%;
+  }
+  
+  /* Adjust modal padding */
+  .profile-modal {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+}
+
+/* Large tablet to small desktop */
+@media (max-width: 1024px) {
+  /* Ensure proper spacing for profile modal */
+  .profile-modal .space-y-4 > div {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* Adjust document status grid */
+  .profile-modal .document-status-grid {
+    gap: 0.5rem;
+  }
+}
+
+/* Large desktop adjustments */
+@media (min-width: 1280px) {
+  .user-list-container {
+    padding: 1.5rem;
+  }
+  
+  /* Optimize table spacing for large screens */
+  .user-list-container th,
+  .user-list-container td {
+    padding: 1rem 2rem;
+  }
+}
+
+/* Extra large screens */
+@media (min-width: 1536px) {
+  .user-list-container {
+    max-width: 1536px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Print styles */
+@media print {
+  .user-list-container button,
+  .user-list-container .fixed {
+    display: none;
+  }
+  
+  .user-list-container table {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  
+  .user-list-container th,
+  .user-list-container td {
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #d1d5db;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .user-list-container .bg-gray-50 {
+    background-color: #f3f4f6;
+  }
+  
+  .user-list-container .border-gray-200 {
+    border-color: #9ca3af;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .user-list-container .animate-spin {
+    animation: none;
+  }
+  
+  .user-list-container .hover-bg-gray:hover {
+    background-color: #f9fafb;
+  }
+}
+
+/* Focus styles for better accessibility */
+.user-list-container button:focus,
+.user-list-container input:focus,
+.user-list-container select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+/* Custom scrollbar for modal */
+.profile-modal {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.profile-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-modal::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.profile-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 3px;
+}
+
+.profile-modal::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+/* Ensure proper text truncation on very small screens */
+@media (max-width: 480px) {
+  .user-list-container .truncate {
+    max-width: 120px;
+  }
+  
+  .user-list-container .text-nowrap {
+    white-space: normal;
+  }
+}
+
+/* Landscape mobile adjustments */
+@media (max-width: 896px) and (orientation: landscape) {
+  .profile-modal {
+    max-height: calc(100vh - 1rem);
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .profile-modal .modal-body {
+    padding: 1rem;
+  }
+}

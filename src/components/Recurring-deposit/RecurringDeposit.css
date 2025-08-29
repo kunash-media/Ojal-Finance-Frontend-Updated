@@ -1,0 +1,92 @@
+/* 
+  RecurringDeposit.css
+  Custom CSS for responsive design of the Recurring Deposit component
+  This file contains only essential responsive styles that complement Tailwind CSS
+*/
+
+/* Background gradient for the component */
+.rd-gradient-bg {
+  background: linear-gradient(135deg, #115e59 0%, #0d9488 100%);
+}
+
+/* Table container scrollable styles */
+.rd-table-container {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 2rem;
+  height: 300px;
+  overflow-y: auto;
+}
+
+/* Modal styles */
+.rd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.rd-modal-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Detail display styles */
+.rd-confirm-details {
+  background-color: #f3f4f6;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.rd-detail-item {
+  display: flex;
+  margin-bottom: 0.5rem;
+}
+
+.rd-detail-label {
+  font-weight: 500;
+  width: 40%;
+  color: #4b5563;
+}
+
+.rd-detail-value {
+  color: #111827;
+  width: 60%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .rd-modal-container {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .rd-detail-item {
+    flex-direction: column;
+  }
+  
+  .rd-detail-label, .rd-detail-value {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .rd-search-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

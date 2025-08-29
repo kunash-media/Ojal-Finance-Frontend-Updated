@@ -1,0 +1,25 @@
+#custom-sticky{
+    position: sticky;
+    right:0;
+    z-index: auto;
+}
+
+
+/* Option 1: Add this CSS to your global styles or component styles */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+}
+
+.sticky-action {
+  position: sticky;
+  right: 0;
+  z-index: 50;
+}
+
+/* Option 2: Alternative approach - Override Tailwind's sticky default */
+.custom-sticky {
+  position: sticky;
+  z-index: auto; /* Reset z-index */
+}
