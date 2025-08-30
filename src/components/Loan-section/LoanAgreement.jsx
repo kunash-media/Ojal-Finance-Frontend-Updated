@@ -4,6 +4,8 @@ import {
   FileText, Dock, ChevronRight, ArrowLeft,
   ArrowRight, CheckCircle, Scale, Check
 } from 'lucide-react';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast,ToastContainer } from 'react-toastify';
 
 const SuccessPopup = ({ onClose }) => {
   return (
@@ -48,14 +50,14 @@ const LoanAgreement = ({ formData, onAgree, isAgreed }) => {
           <p className="mb-2 text-center" >
             <strong>This LOAN AGREEMENT "Personal Loan" Agreement executed</strong>
           </p>
-          <p className="mb-2 text-center" id= "center-text-id">
+          <p className="mb-2 text-center" id="center-text-id">
             <strong>Between</strong>
           </p>
           <p className="mb-1">
             Mr./Miss/Mrs. <strong>{formData.memberName || '[Borrower Name]'}</strong> S/o <strong>{formData.fatherName || '[Father Name]'}</strong>,
             R/O <strong>{formData.address || '[Borrower Address]'}</strong> hereinafter referred as "<strong>borrower</strong>".
           </p>
-          <p className="mb-0 text-center" id= "center-text-id">
+          <p className="mb-0 text-center" id="center-text-id">
             <strong>And</strong>
           </p>
           <p className="mb-4">
@@ -85,7 +87,7 @@ const LoanAgreement = ({ formData, onAgree, isAgreed }) => {
                   <span>Processing Fee:</span>
                   <span className="font-semibold">₹{parseFloat(formData.processingFee || 0).toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between">  
+                <div className="flex justify-between">
                   <span>Disbursed Amount:</span>
                   <span className="font-semibold">₹{((parseFloat(formData.loanAmount) || 0) - (parseFloat(formData.processingFee) || 0)).toLocaleString('en-IN')}</span>
                 </div>
@@ -225,6 +227,7 @@ const LoanAgreement = ({ formData, onAgree, isAgreed }) => {
 };
 
 const LoanApplicationForm = () => {
+
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     applicationNo: '',
@@ -243,15 +246,15 @@ const LoanApplicationForm = () => {
     memberType: '',
     branchName: '',
     address: '',
-    panNumber:'',
+    panNumber: '',
     adhaarNumber: '',
     grantorName: '',
     grantorAddress: '',
-    grantorMobile:'',
+    grantorMobile: '',
     nomineeName: '',
-    nomineeAddress:'',
+    nomineeAddress: '',
     nomineeMobile: '',
-    processingFee:'855',
+    processingFee: '855',
     disbursedAmount: '',
     photo: null,
     applicantSignature: null,
@@ -327,7 +330,7 @@ const LoanApplicationForm = () => {
     } else {
       setFormData(prev => ({ ...prev, emiAmount: '0' }));
     }
-};
+  };
 
   const handleFileUpload = (e, type) => {
     const file = e.target.files[0];
@@ -436,8 +439,8 @@ const LoanApplicationForm = () => {
       return;
     }
 
-    // Generate application number after completing step 2
-    if (currentStep === 2 && !formData.applicationNo) {
+    // Generate application number after completing step 4
+    if (currentStep === 4 && !formData.applicationNo) {
       const newApplicationNo = generateApplicationNumber();
       setFormData(prev => ({
         ...prev,
@@ -504,915 +507,1012 @@ const LoanApplicationForm = () => {
     const totalPayable = (parseFloat(formData.emiAmount || 0) * parseInt(formData.tenure || 0)).toLocaleString('en-IN');
 
     const htmlContent = `
-     <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Loan Application - ${formData.applicationNo || 'N/A'}</title>
-  <style>
-    @page {
-      margin: 23mm 15mm 15mm 15mm; /* Reduced top margin for page 1 */
-      size: A4;
-    }
-    * {
-      box-sizing: border-box;
-    }
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Loan Application - ${formData.applicationNo || 'N/A'}</title>
+      <style>
+      @page {
+        margin: 23mm 15mm 15mm 15mm; /* Reduced top margin for page 1 */
+        size: A4;
+      }
+      * {
+        box-sizing: border-box;
+      }
 
-    #center-text-id{
-      text-align : center ;
-    }
+      #center-text-id{
+        text-align : center ;
+      }
 
-    body { 
-      font-family: 'Arial', sans-serif; 
-      margin: 0; 
-      padding: 0; 
-      font-size: 10px; 
-      line-height: 1.3;
-      color: #333;
-    }
-    .page {
-      min-height: 100vh;
-      page-break-after: always;
-      position: relative;
-      padding-bottom: 30px; /* Reduced padding-bottom to save space */
-    }
-    .page:last-child {
-      page-break-after: avoid;
-    }
-    .header { 
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 20px; 
-      border-bottom: 2px solid #0066cc;
-      padding-bottom: 15px;
-      position: relative;
-    }
-    .logo-container {
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-    .logo-container img {
-      height: 60px;
-      width: auto;
-    }
-    .company-info {
-      text-align: center;
-      width: 100%;
-    }
-    .company-name {
-      font-size: 24px;
-      font-weight: bold;
-      color: #672d91;
-      margin-bottom: 5px;
-    }
-    .company-address {
-      font-size: 9px;
-      color: #666;
-      margin-bottom: 10px;
-    }
-    .form-title {
-      font-size: 16px;
-      font-weight: bold;
-      color: #333;
-      text-decoration: underline;
-      margin-top: 10px;
-    }
-    .form-container { 
-      display: flex; 
-      gap: 20px; 
-      margin-bottom: 20px; 
-    }
-    .left-section { 
-      flex: 2; 
-    }
-    .right-section { 
-      flex: 1; 
-      text-align: center;
-    }
-    .section { 
-      border: 1px solid #333; 
-      margin-bottom: 15px; 
-      page-break-inside: avoid;
-    }
-    .section-title { 
-      font-weight: bold; 
-      background: #f5f5f5; 
-      padding: 8px 12px; 
-      margin: 0;
-      border-bottom: 1px solid #333;
-      font-size: 11px;
-      text-transform: uppercase;
-    }
-    .section-content {
-      padding: 10px;
-    }
-    .field-row { 
-      display: flex; 
-      margin-bottom: 6px; 
-      align-items: center;
-    }
-    .field-label { 
-      font-weight: bold; 
-      width: 130px; 
-      font-size: 9px;
-      flex-shrink: 0; /* Prevent label from shrinking */
-    }
-    .field-value { 
-      flex: 1; 
-      border-bottom: 1px solid #ccc; 
-      min-height: 16px; 
-      padding: 2px 5px;
-      font-size: 10px;
-    }
-    .split-row {
-      display: flex;
-      gap: 5px; /* Reduced gap between Grantor and Nominee fields */
-      margin-bottom: 6px; /* Match field-row margin for consistency */
-    }
-    .split-field {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 2px; /* Reduced gap between label and value */
-    }
-    .split-field .field-label {
-      width: auto; /* Override fixed width for split-field labels */
-      min-width: 80px; /* Ensure label has enough space but not too much */
-    }
-    .split-field .field-value {
-      flex: 1;
-      padding-left: 2px; /* Reduced padding to minimize space */
-    }
-    .photo-container {
-      border: 2px solid #333;
-      width: 100px;
-      height: 130px;
-      margin: 0 auto 15px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fafafa;
-    }
-    .photo-container img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: cover;
-    }
-    .signature-container {
-      border: 1px solid #333;
-      width: 180px;
-      height: 50px;
-      margin: 10px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fafafa;
-    }
-    .signature-container img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-    .signature-label {
-      font-size: 9px;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .emi-table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      margin-top: 10px; 
-      font-size: 8px;
-    }
-    .emi-table th, .emi-table td { 
-      border: 1px solid #333; 
-      padding: 4px 2px; 
-      text-align: center; 
-      vertical-align: middle;
-    }
-    .emi-table th { 
-      background: #f0f0f0; 
-      font-weight: bold;
-      font-size: 8px;
-    }
-    .declaration { 
-      font-size: 9px; 
-      margin-top: 8px; /* Reduced margin-top */
-      padding: 6px; /* Reduced padding */
-      border: 1px solid #333;
-      text-align: justify;
-      line-height: 1.3;
-      width: 100%; /* Ensure declaration width is reference for table */
-      page-break-inside: avoid; /* Prevent declaration from splitting */
-    }
-    .declaration-title {
-      font-weight: bold;
-      font-size: 10px;
-      margin-bottom: 5px; /* Reduced margin-bottom */
-      text-decoration: underline;
-      text-align: center;
-    }
-    .footer-signatures {
-      margin-top: 10px; /* Reduced margin-top */
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      gap: 20px;
-      page-break-inside: avoid; /* Prevent signatures from splitting */
-    }
-    .signature-section {
-      text-align: center;
-      flex: 1;
-    }
-    .signature-box {
-      border: 1px solid #333;
-      height: 60px;
-      width: 150px;
-      margin: 0 auto 10px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fafafa;
-    }
-    .signature-box img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-    .signature-line {
-      border-top: 1px solid #333;
-      width: 140px;
-      margin: 5px auto;
-    }
-    .print-info {
-      font-size: 8px;
-      color: #666;
-      text-align: center;
-      margin-top: 8px; /* Reduced margin-top */
-      border-top: 1px solid #ccc;
-      padding-top: 5px; /* Reduced padding-top */
-      page-break-inside: avoid; /* Prevent print-info from splitting */
-    }
-    .agreement-section {
-      margin: 20px 0;
-      padding: 15px;
-      border: 1px solid #ddd;
-      background: #fffaf0;
-    }
-    .agreement-title {
-      text-align: center;
-      font-weight: bold;
-      font-size: 14px;
-      margin-bottom: 15px;
-      text-decoration: underline;
-    }
-    .agreement-content {
-      font-size: 9px;
-      line-height: 1.4;
-      text-align: justify;
-    }
-    .agreement-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin: 15px 0;
-    }
-    .agreement-box {
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background: #f9f9f9;
-    }
-    .agreement-box-title {
-      font-weight: bold;
-      margin-bottom: 8px;
-      font-size: 10px;
-    }
-    .agreement-notice {
-      background: #ffe6e6;
-      padding: 10px;
-      border: 1px solid #ff9999;
-      margin: 15px 0;
-      font-size: 9px;
-    }
-    .agreement-checkbox {
-      margin-top: 15px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      background: #f9f9f9;
-    }
-    .agreement-header {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #0066cc;
-      padding-bottom: 15px;
-      position: relative;
-    }
-    @media print {
-      .no-print { display: none; }
-      body { print-color-adjust: exact; }
-      .page { page-break-after: always; }
-      .page:last-child { page-break-after: avoid; }
-    }
-  </style>
-</head>
-<body>
-  <!-- Page 1: Application Form -->
-  <div class="page">
-    <div class="header">
-      <div class="logo-container">
-        <img src="/src/assets/ojal-logo.png" alt="OJAL Micro Finance">
-      </div>
-      <div class="company-info">
-        <div class="company-name">OJAL MICRO SERVICE FOUNDATION</div>
-        <div class="company-address">
-          CIN: U88900PN2023NPL219300<br>
-          Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
-          Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+      body { 
+        font-family: 'Arial', sans-serif; 
+        margin: 0; 
+        padding: 0; 
+        font-size: 10px; 
+        line-height: 1.3;
+        color: #333;
+      }
+      .page {
+        min-height: 100vh;
+        page-break-after: always;
+        position: relative;
+        padding-bottom: 30px; /* Reduced padding-bottom to save space */
+      }
+      .page:last-child {
+        page-break-after: avoid;
+      }
+      .header { 
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px; 
+        border-bottom: 2px solid #0066cc;
+        padding-bottom: 15px;
+        position: relative;
+      }
+      .logo-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      .logo-container img {
+        height: 60px;
+        width: auto;
+      }
+      .company-info {
+        text-align: center;
+        width: 100%;
+      }
+      .company-name {
+        font-size: 24px;
+        font-weight: bold;
+        color: #672d91;
+        margin-bottom: 5px;
+      }
+      .company-address {
+        font-size: 9px;
+        color: #666;
+        margin-bottom: 10px;
+      }
+      .form-title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        text-decoration: underline;
+        margin-top: 10px;
+      }
+      .form-container { 
+        display: flex; 
+        gap: 20px; 
+        margin-bottom: 20px; 
+      }
+      .left-section { 
+        flex: 2; 
+      }
+      .right-section { 
+        flex: 1; 
+        text-align: center;
+      }
+      .section { 
+        border: 1px solid #333; 
+        margin-bottom: 15px; 
+        page-break-inside: avoid;
+      }
+      .section-title { 
+        font-weight: bold; 
+        background: #f5f5f5; 
+        padding: 8px 12px; 
+        margin: 0;
+        border-bottom: 1px solid #333;
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+      .section-content {
+        padding: 10px;
+      }
+      .field-row { 
+        display: flex; 
+        margin-bottom: 6px; 
+        align-items: center;
+      }
+      .field-label { 
+        font-weight: bold; 
+        width: 130px; 
+        font-size: 9px;
+        flex-shrink: 0; /* Prevent label from shrinking */
+      }
+      .field-value { 
+        flex: 1; 
+        border-bottom: 1px solid #ccc; 
+        min-height: 16px; 
+        padding: 2px 5px;
+        font-size: 10px;
+      }
+      .split-row {
+        display: flex;
+        gap: 5px; /* Reduced gap between Grantor and Nominee fields */
+        margin-bottom: 6px; /* Match field-row margin for consistency */
+      }
+      .split-field {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 2px; /* Reduced gap between label and value */
+      }
+      .split-field .field-label {
+        width: auto; /* Override fixed width for split-field labels */
+        min-width: 80px; /* Ensure label has enough space but not too much */
+      }
+      .split-field .field-value {
+        flex: 1;
+        padding-left: 2px; /* Reduced padding to minimize space */
+      }
+      .photo-container {
+        border: 2px solid #333;
+        width: 100px;
+        height: 130px;
+        margin: 0 auto 15px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+      }
+      .photo-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+      }
+      .signature-container {
+        border: 1px solid #333;
+        width: 180px;
+        height: 50px;
+        margin: 10px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+      }
+      .signature-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+      .signature-label {
+        font-size: 9px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      .emi-table { 
+        width: 100%; 
+        border-collapse: collapse; 
+        margin-top: 10px; 
+        font-size: 8px;
+      }
+      .emi-table th, .emi-table td { 
+        border: 1px solid #333; 
+        padding: 4px 2px; 
+        text-align: center; 
+        vertical-align: middle;
+      }
+      .emi-table th { 
+        background: #f0f0f0; 
+        font-weight: bold;
+        font-size: 8px;
+      }
+      .declaration { 
+        font-size: 9px; 
+        margin-top: 8px; /* Reduced margin-top */
+        padding: 6px; /* Reduced padding */
+        border: 1px solid #333;
+        text-align: justify;
+        line-height: 1.3;
+        width: 100%; /* Ensure declaration width is reference for table */
+        page-break-inside: avoid; /* Prevent declaration from splitting */
+      }
+      .declaration-title {
+        font-weight: bold;
+        font-size: 10px;
+        margin-bottom: 5px; /* Reduced margin-bottom */
+        text-decoration: underline;
+        text-align: center;
+      }
+      .footer-signatures {
+        margin-top: 10px; /* Reduced margin-top */
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        page-break-inside: avoid; /* Prevent signatures from splitting */
+      }
+      .signature-section {
+        text-align: center;
+        flex: 1;
+      }
+      .signature-box {
+        border: 1px solid #333;
+        height: 60px;
+        width: 150px;
+        margin: 0 auto 10px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fafafa;
+      }
+      .signature-box img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
+      .signature-line {
+        border-top: 1px solid #333;
+        width: 140px;
+        margin: 5px auto;
+      }
+      .print-info {
+        font-size: 8px;
+        color: #666;
+        text-align: center;
+        margin-top: 8px; /* Reduced margin-top */
+        border-top: 1px solid #ccc;
+        padding-top: 5px; /* Reduced padding-top */
+        page-break-inside: avoid; /* Prevent print-info from splitting */
+      }
+      .agreement-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        background: #fffaf0;
+      }
+      .agreement-title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 15px;
+        text-decoration: underline;
+      }
+      .agreement-content {
+        font-size: 9px;
+        line-height: 1.4;
+        text-align: justify;
+      }
+      .agreement-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin: 15px 0;
+      }
+      .agreement-box {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: #f9f9f9;
+      }
+      .agreement-box-title {
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 10px;
+      }
+      .agreement-notice {
+        background: #ffe6e6;
+        padding: 10px;
+        border: 1px solid #ff9999;
+        margin: 15px 0;
+        font-size: 9px;
+      }
+      .agreement-checkbox {
+        margin-top: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        background: #f9f9f9;
+      }
+      .agreement-header {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #0066cc;
+        padding-bottom: 15px;
+        position: relative;
+      }
+      @media print {
+        .no-print { display: none; }
+        body { print-color-adjust: exact; }
+        .page { page-break-after: always; }
+        .page:last-child { page-break-after: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Page 1: Application Form -->
+    <div class="page">
+      <div class="header">
+        <div class="logo-container">
+          <img src="/src/assets/ojal-logo.png" alt="OJAL Micro Finance">
         </div>
-        <div class="form-title">LOAN APPLICATION FORM</div>
+        <div class="company-info">
+          <div class="company-name">OJAL MICRO SERVICE FOUNDATION</div>
+          <div class="company-address">
+            CIN: U88900PN2023NPL219300<br>
+            Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
+            Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+          </div>
+          <div class="form-title">LOAN APPLICATION FORM</div>
+        </div>
       </div>
-    </div>
-    
-    <div class="form-container">
-      <div class="left-section">
-        <div class="section">
-          <div class="section-title">Loan Details</div>
-          <div class="section-content">
-            <div class="field-row">
-              <span class="field-label">Application No:</span>
-              <span class="field-value">${formData.applicationNo || 'N/A'}</span>
+      
+      <div class="form-container">
+        <div class="left-section">
+          <div class="section">
+            <div class="section-title">Loan Details</div>
+            <div class="section-content">
+              <div class="field-row">
+                <span class="field-label">Application No:</span>
+                <span class="field-value">${formData.applicationNo || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Purpose of Loan:</span>
+                <span class="field-value">${formData.purposeOfLoan || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Loan Scheme:</span>
+                <span class="field-value">${formData.loanScheme || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Loan Amount:</span>
+                <span class="field-value">₹ ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">ROI (%):</span>
+                <span class="field-value">${formData.roi || '0'}%</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Applied Date:</span>
+                <span class="field-value">${formData.appliedDate ? new Date(formData.appliedDate).toLocaleDateString('en-GB') : 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Tenure/Frequency:</span>
+                <span class="field-value">${formData.tenure || '0'} Months</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">EMI Amount:</span>
+                <span class="field-value">₹ ${parseFloat(formData.emiAmount || 0).toLocaleString('en-IN')}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">PAN Number:</span>
+                <span class="field-value">${formData.panNumber || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Adhaar Number:</span>
+                <span class="field-value">${formData.adhaarNumber || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Processing Fee:</span>
+                <span class="field-value">₹${formData.processingFee || '₹855'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Disbursed Amount:</span>
+                <span class="field-value">₹${((parseFloat(formData.loanAmount) || 0) - (parseFloat(formData.processingFee) || 0)).toLocaleString('en-IN')}</span>
+              </div>
             </div>
-            <div class="field-row">
-              <span class="field-label">Purpose of Loan:</span>
-              <span class="field-value">${formData.purposeOfLoan || 'N/A'}</span>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Applicant Details</div>
+            <div class="section-content">
+              <div class="field-row">
+                <span class="field-label">Member No:</span>
+                <span class="field-value">${formData.memberNo || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Member Name:</span>
+                <span class="field-value">${formData.memberName || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Father/Husband Name:</span>
+                <span class="field-value">${formData.fatherName || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Mobile No:</span>
+                <span class="field-value">${formData.mobile || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Date of Joining:</span>
+                <span class="field-value">${formData.dateOfJoining ? new Date(formData.dateOfJoining).toLocaleDateString('en-GB') : 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Member Type:</span>
+                <span class="field-value">${formData.memberType || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Branch Name:</span>
+                <span class="field-value">${formData.branchName || 'N/A'}</span>
+              </div>
+              <div class="field-row">
+                <span class="field-label">Address:</span>
+                <span class="field-value">${formData.address || 'N/A'}</span>
+              </div>
             </div>
-            <div class="field-row">
-              <span class="field-label">Loan Scheme:</span>
-              <span class="field-value">${formData.loanScheme || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Loan Amount:</span>
-              <span class="field-value">₹ ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">ROI (%):</span>
-              <span class="field-value">${formData.roi || '0'}%</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Applied Date:</span>
-              <span class="field-value">${formData.appliedDate ? new Date(formData.appliedDate).toLocaleDateString('en-GB') : 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Tenure/Frequency:</span>
-              <span class="field-value">${formData.tenure || '0'} Months</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">EMI Amount:</span>
-              <span class="field-value">₹ ${parseFloat(formData.emiAmount || 0).toLocaleString('en-IN')}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">PAN Number:</span>
-              <span class="field-value">${formData.panNumber || 'N/A'}</span>
-            </div>
-             <div class="field-row">
-              <span class="field-label">Adhaar Number:</span>
-              <span class="field-value">${formData.adhaarNumber || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Processing Fee:</span>
-              <span class="field-value">₹${formData.processingFee || '₹855'}</span>
-            </div>
-             <div class="field-row">
-              <span class="field-label">Disbursed Amount:</span>
-              <span class="field-value">₹${((parseFloat(formData.loanAmount) || 0) - (parseFloat(formData.processingFee) || 0)).toLocaleString('en-IN')}</span>
+          </div>
+
+          <div class="section" style="width: 100%;">
+            <div class="section-title">Grantor and Nominee Details</div>
+            <div class="section-content">
+              <div class="split-row">
+                <div class="split-field">
+                  <span class="field-label">Grantor Name:</span>
+                  <span class="field-value">${formData.grantorName || 'N/A'}</span>
+                </div>
+                <div class="split-field">
+                  <span class="field-label">Nominee Name:</span>
+                  <span class="field-value">${formData.nomineeName || 'N/A'}</span>
+                </div>
+              </div>
+              <div class="split-row">
+                <div class="split-field">
+                  <span class="field-label">Grantor Address:</span>
+                  <span class="field-value">${formData.grantorAddress || 'N/A'}</span>
+                </div>
+                <div class="split-field">
+                  <span class="field-label">Nominee Address:</span>
+                  <span class="field-value">${formData.nomineeAddress || 'N/A'}</span>
+                </div>
+              </div>
+              <div class="split-row">
+                <div class="split-field">
+                  <span class="field-label">Grantor Mobile:</span>
+                  <span class="field-value">${formData.grantorMobile || 'N/A'}</span>
+                </div>
+                <div class="split-field">
+                  <span class="field-label">Nominee Mobile:</span>
+                  <span class="field-value">${formData.nomineeMobile || 'N/A'}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="section">
-          <div class="section-title">Applicant Details</div>
-          <div class="section-content">
-            <div class="field-row">
-              <span class="field-label">Member No:</span>
-              <span class="field-value">${formData.memberNo || 'N/A'}</span>
+        <div class="right-section">
+          <div class="photo-container">
+            ${formData.photo ? `<img src="${formData.photo}" alt="Applicant Photo">` : '<div style="color: #666;">PHOTO<br>(Optional)</div>'}
+          </div>
+          <div class="signature-container">
+            ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : '<div style="color: #666;">Signature</div>'}
+          </div>
+          <div class="signature-label">Applicant Signature</div>
+        </div>
+      </div>
+
+      <div class="declaration">
+        <div class="declaration-title">DECLARATION</div>
+        <p>I myself declare that above given information is true and authenticated best of my knowledge. I am ready to pay above registration fees from myself income resources. I solemnly declare that will not return above amount to me/us. I also declare that company will pay to this money to insurance company for myself/my family health insurance premium and give to me/us a health cover. I declare that never dispute to company in case denial/rejection the loan/unit /ohg loan/health cover/home loan/cattle loan/insurance loan /education loan/marriage loan /others loan /project sanctioned by company.</p>
+      </div>
+
+      <div class="footer-signatures">
+        <div class="signature-section">
+          <div class="signature-box">
+            ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">Applicant Signature</div>
+          <div style="font-size: 9px;">(${formData.memberName})</div>
+        </div>
+        
+        <div class="signature-section">
+          <div class="signature-box">
+            ${formData.guarantorSignature ? `<img src="${formData.guarantorSignature}" alt="Guarantor Signature">` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">Guarantor Signature</div>
+          <div style="font-size: 9px;">(${formData.grantorName})</div>
+        </div>
+        
+        <div class="signature-section">
+          <div class="signature-box">
+            ${formData.branchSeal ? `<img src="${formData.branchSeal}" alt="Branch Seal">` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">Branch Seal with Signature</div>
+          <div style="font-size: 9px;">(Authorized Signatory)</div>
+        </div>
+      </div>
+
+      <div class="print-info">
+        <div>Application Date & Time: ${new Date().toLocaleString('en-IN')}</div>
+        <div>Reference ID: ${formData.applicationNo || 'N/A'} | OJAL MICRO SERVICE FOUNDATION</div>
+      </div>
+    </div>
+
+    <!-- Page 2: Loan Agreement -->
+    <div class="page">
+      <div class="agreement-header">
+        <div class="logo-container">
+          <img src="/src/assets/ojal-logo.png" alt="OJAL Micro Finance">
+        </div>
+        <div class="company-info">
+          <div class="company-name">OJAL MICRO SERVICE FOUNDATION</div>
+          <div class="company-address">
+            CIN: U88900PN2023NPL219300<br>
+            Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
+            Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+          </div>
+          <div class="form-title">LOAN AGREEMENT</div>
+        </div>
+      </div>
+      
+      <div class="agreement-content">
+        <p>
+          <strong>This LOAN AGREEMENT "Personal Loan" Agreement executed between</strong>
+        </p>
+        
+        <p>
+          Mr./Miss/Mrs. <strong>${formData.memberName || '[Borrower Name]'}</strong> S/o <strong>${formData.fatherName || '[Father Name]'}</strong>, 
+          R/O <strong>${formData.address || '[Borrower Address]'}</strong> hereinafter referred as "<strong>borrower</strong>".
+        </p>
+        
+        <p>
+          M/s <strong>OJAL MICRO SERVICE FOUNDATION</strong>, a <strong>Private Limited</strong> Company incorporated under the companies act, 2013, 
+          having registered office at <strong>SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015</strong> hereinafter referred as "<strong>Lender</strong>".
+        </p>
+        
+        <p>
+          <strong>IN CONSIDERATION OF</strong> the Lender loaning certain monies (the Loan) to the Borrower, and the Borrower repaying the Loan to the Lender, 
+          the parties agree to keep, perform and fulfill the promises and conditions set out in this Agreement.
+        </p>
+        
+        <p>
+          <strong>WHEREAS</strong> the Borrower is in need of funds and hence has approached the Lender to grant her Rs. ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')} /- 
+          for a period of ${formData.tenure || '0'} Days.
+        </p>
+
+        <div class="agreement-grid">
+          <div class="agreement-box">
+            <div class="agreement-box-title">LOAN DETAILS</div>
+            <div style="font-size: 9px; line-height: 1.4;">
+              <div style="display: flex; justify-content: space-between;">
+                <span>Loan Amount:</span>
+                <span style="font-weight: bold;">₹${formattedLoanAmount}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span>Processing Fee:</span>
+                <span style="font-weight: bold;">₹${parseFloat(formData.processingFee || 0).toLocaleString('en-IN')}</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between;">  
+                <span>Disbursed Amount:</span>
+                <span style="font-weight: bold;">₹${((parseFloat(formData.loanAmount) || 0) - (parseFloat(formData.processingFee) || 0)).toLocaleString('en-IN')}</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between;">
+                <span>Interest Rate:</span>
+                <span style="font-weight: bold;">${formData.roi || '0'}% per annum</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between;">
+                <span>Tenure:</span>
+                <span style="font-weight: bold;">${formData.tenure || '0'} Days</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between;">
+                <span>EMI Amount:</span>
+                <span style="font-weight: bold;">₹${formattedEmiAmount}</span>
+              </div>
+
+              <div style="display: flex; justify-content: space-between;">
+                <span>Total Payable:</span>
+                <span style="font-weight: bold;">₹${totalPayable}</span>
+              </div>
+
             </div>
-            <div class="field-row">
-              <span class="field-label">Member Name:</span>
-              <span class="field-value">${formData.memberName || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Father/Husband Name:</span>
-              <span class="field-value">${formData.fatherName || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Mobile No:</span>
-              <span class="field-value">${formData.mobile || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Date of Joining:</span>
-              <span class="field-value">${formData.dateOfJoining ? new Date(formData.dateOfJoining).toLocaleDateString('en-GB') : 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Member Type:</span>
-              <span class="field-value">${formData.memberType || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Branch Name:</span>
-              <span class="field-value">${formData.branchName || 'N/A'}</span>
-            </div>
-            <div class="field-row">
-              <span class="field-label">Address:</span>
-              <span class="field-value">${formData.address || 'N/A'}</span>
+          </div>
+
+          <div class="agreement-box">
+            <div class="agreement-box-title">BORROWER DETAILS</div>
+            <div style="font-size: 9px; line-height: 1.4;">
+              <div><strong>Name:</strong> ${formData.memberName || 'N/A'}</div>
+              <div><strong>Father's Name:</strong> ${formData.fatherName || 'N/A'}</div>
+              <div><strong>Member No:</strong> ${formData.memberNo || 'N/A'}</div>
+              <div><strong>Mobile:</strong> ${formData.mobile || 'N/A'}</div>
+              <div><strong>Purpose:</strong> ${formData.purposeOfLoan || 'N/A'}</div>
             </div>
           </div>
         </div>
 
-        <div class="section" style="width: 100%;">
-          <div class="section-title">Grantor and Nominee Details</div>
-          <div class="section-content">
-            <div class="split-row">
-              <div class="split-field">
-                <span class="field-label">Grantor Name:</span>
-                <span class="field-value">${formData.grantorName || 'N/A'}</span>
-              </div>
-              <div class="split-field">
-                <span class="field-label">Nominee Name:</span>
-                <span class="field-value">${formData.nomineeName || 'N/A'}</span>
-              </div>
-            </div>
-            <div class="split-row">
-              <div class="split-field">
-                <span class="field-label">Grantor Address:</span>
-                <span class="field-value">${formData.grantorAddress || 'N/A'}</span>
-              </div>
-              <div class="split-field">
-                <span class="field-label">Nominee Address:</span>
-                <span class="field-value">${formData.nomineeAddress || 'N/A'}</span>
-              </div>
-            </div>
-            <div class="split-row">
-              <div class="split-field">
-                <span class="field-label">Grantor Mobile:</span>
-                <span class="field-value">${formData.grantorMobile || 'N/A'}</span>
-              </div>
-              <div class="split-field">
-                <span class="field-label">Nominee Mobile:</span>
-                <span class="field-value">${formData.nomineeMobile || 'N/A'}</span>
-              </div>
-            </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 8px;">
+            <strong>Loan Amount & Interest:</strong>
+            <ol style="margin: 5px 0; padding-left: 15px;">
+              <li>The Borrower hereto, requiring money, has requested the Lender to give her a with interest loan of Rs. ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')} /-</li>
+              <li>The said loan is required by the Borrower for a period of ${formData.tenure || '0'} Days</li>
+              <li>The Borrower hereby agrees and undertakes to return the loan of Rs. ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')} /- within the aforesaid period of ${formData.tenure || '0'} Days and, gives his personal guarantee for the same.</li>
+              <li>The terms and conditions of this Agreement are arrived at by the mutual consent of the parties hereto.</li>
+            </ol>
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Payment:</strong>
+            <ol style="margin: 5px 0; padding-left: 15px;">
+              <li>This Loan will be repaid in full on the due date.</li>
+              <li>At any time while not in default under this Agreement, the Borrower may make lump sum payments or pay the outstanding balance then owing under this agreement to the lender without further bonus or penalty.</li>
+            </ol>
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Default:</strong><br>
+            Notwithstanding anything to the contrary in this agreement, if the Borrower defaults in the performance of any obligation under this agreement, then the lender may declare the amount owing under this Agreement at that time to be immediately due and payable.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Governing Law:</strong><br>
+            This Agreement will be construed in accordance with and governed by the laws of the State.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Cost:</strong><br>
+            The Borrower shall be liable for all costs, expenses and expenditures incurred including, without limitation, the complete legal costs of the lender incurred by enforcing this a result of any default by the Borrower and such costs will be added to the principal then outstanding and shall be due and payable by the Borrower to the Lender immediately upon demand of the Lender.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Binding Effect:</strong><br>
+            This Agreement will pass to the benefit of and be binding upon the respective heirs, executors, administrators, successors and permitted assigns of the Borrower and Lender. The Borrower waives presentment for payment, notice of non-payment, protest, and notice of protest.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Amendments:</strong><br>
+            This Agreement may only be amended or modified by a written instrument executed by both the Borrower and the Lender.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Severability:</strong><br>
+            The Clauses and paragraphs contained in this agreement are intended to be read and construed independently of each other. If any term, covenant, condition or provision of this agreement id held by a court of competent jurisdiction to be invalid, void or unenforceable, it is the parties' intent that such provision be reduced in scope by the court to the extent deemed necessary by the court to render the provision reasonable and enforceable and the remainder of the provisions of this agreement will in no way be affected, i impaired or invalidated as a result.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>General Provisions:</strong><br>
+            Headings are inserted for the convenience of the parties only and are not to be considered when interpreting this agreement. Words in the singular mean and include the plural and vice versa. Words in the masculine mean and include the feminine and vice versa.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>Entire Agreement:</strong><br>
+            This agreement constitutes the entire agreement between the parties and there are no further items or provisions, either oral or otherwise.
+          </div>
+
+          <div style="margin-bottom: 8px;">
+            <strong>IN WITNESS WHEREOF:</strong><br>
+            The parties hereto have hereunto set and subscribed their respective hands the day and year first hereinabove written.
+          </div>
+        </div>
+
+        <div class="agreement-notice">
+          <strong>IMPORTANT NOTICE:</strong><br>
+          By signing this agreement, the Borrower acknowledges having read, understood, and agreed to all the terms 
+          and conditions mentioned herein. This agreement is legally binding and enforceable under Indian law.
+        </div>
+
+        <div class="agreement-checkbox">
+          <strong>I, ${formData.memberName || '[Borrower Name]'}, hereby acknowledge that:</strong><br>
+          • I have read and understood all the terms and conditions of this Loan Agreement<br>
+          • I agree to comply with all the terms mentioned in this agreement<br>
+          • I understand the consequences of default and agree to the penalty structure<br>
+          • All information provided by me is true and accurate to the best of my knowledge<br>
+          • I agree to use the loan amount solely for the stated purpose<br>
+          <strong>I hereby accept this Loan Agreement and agree to be bound by its terms and conditions.</strong>
+        </div>
+      </div>
+
+      <div class="footer-signatures">
+        <div class="signature-section">
+          <div class="signature-box">
+            ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">Borrower Signature</div>
+          <div style="font-size: 9px;">(${formData.memberName})</div>
+        </div>
+        
+        <div class="signature-section">
+          <div class="signature-box">
+            ${formData.guarantorSignature ? `<img src="${formData.guarantorSignature}" alt="Guarantor Signature">` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">Co-Borrower Signature</div>
+          <div style="font-size: 9px;">(${formData.grantorName})</div>
+        </div>
+        
+        <div class="signature-section">
+          <div class="signature-box"></div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">For OJAL MICRO SERVICE FOUNDATION</div>
+          <div style="font-size: 9px;">(Authorized Signatory)</div>
+        </div>
+      </div>
+
+      <div class="print-info">
+        <div>Agreement Date & Time: ${new Date().toLocaleString('en-IN')}</div>
+        <div>Reference ID: ${formData.applicationNo || 'N/A'} | OJAL MICRO SERVICE FOUNDATION</div>
+      </div>
+    </div>
+
+    <!-- Page 3: EMI Card -->
+    <div class="page">
+      <div class="header">
+        <div class="logo-container">
+          <img src="/src/assets/ojal-logo.png" alt="OJAL Micro Finance">
+        </div>
+        <div class="company-info">
+          <div class="company-name">OJAL MICRO SERVICE FOUNDATION</div>
+          <div class="company-address">
+            CIN: U88900PN2023NPL219300<br>
+            Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
+            Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+          </div>
+          <div class="form-title">LOAN EMI CARD</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Loan Details</div>
+        <div class="section-content">
+          <div class="field-row">
+            <span class="field-label">Branch:</span>
+            <span class="field-value">OJAL MICRO SERVICE FOUNDATION</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Date:</span>
+            <span class="field-value">${new Date().toLocaleDateString('en-GB')}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Customer Name:</span>
+            <span class="field-value">${formData.memberName || 'N/A'}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Contact No:</span>
+            <span class="field-value">${formData.mobile || 'N/A'}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Loan Amount:</span>
+            <span class="field-value">₹ ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Processing Fee:</span>
+            <span class="field-value">₹ ${parseFloat(formData.processingFee || 0).toLocaleString('en-IN')}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Disbursed Amount:</span>
+            <span class="field-value">₹ ${parseFloat(formData.disbursedAmount || 0).toLocaleString('en-IN')}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Number of EMI:</span>
+            <span class="field-value">${formData.tenure || '0'}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Plan Name:</span>
+            <span class="field-value">${formData.loanScheme || 'N/A'}</span>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Exit Amount:</span>
+            <span class="field-value">₹ ${totalPayable}</span>
           </div>
         </div>
       </div>
 
-      <div class="right-section">
-        <div class="photo-container">
-          ${formData.photo ? `<img src="${formData.photo}" alt="Applicant Photo">` : '<div style="color: #666;">PHOTO<br>(Optional)</div>'}
-        </div>
-        <div class="signature-container">
-          ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : '<div style="color: #666;">Signature</div>'}
-        </div>
-        <div class="signature-label">Applicant Signature</div>
-      </div>
-    </div>
-
-    <div class="declaration">
-      <div class="declaration-title">DECLARATION</div>
-      <p>I myself declare that above given information is true and authenticated best of my knowledge. I am ready to pay above registration fees from myself income resources. I solemnly declare that will not return above amount to me/us. I also declare that company will pay to this money to insurance company for myself/my family health insurance premium and give to me/us a health cover. I declare that never dispute to company in case denial/rejection the loan/unit /ohg loan/health cover/home loan/cattle loan/insurance loan /education loan/marriage loan /others loan /project sanctioned by company.</p>
-    </div>
-
-    <div class="footer-signatures">
-      <div class="signature-section">
-        <div class="signature-box">
-          ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : ''}
-        </div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">Applicant Signature</div>
-        <div style="font-size: 9px;">(${formData.memberName})</div>
-      </div>
-      
-      <div class="signature-section">
-        <div class="signature-box">
-          ${formData.guarantorSignature ? `<img src="${formData.guarantorSignature}" alt="Guarantor Signature">` : ''}
-        </div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">Guarantor Signature</div>
-        <div style="font-size: 9px;">(${formData.grantorName})</div>
-      </div>
-      
-      <div class="signature-section">
-        <div class="signature-box">
-          ${formData.branchSeal ? `<img src="${formData.branchSeal}" alt="Branch Seal">` : ''}
-        </div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">Branch Seal with Signature</div>
-        <div style="font-size: 9px;">(Authorized Signatory)</div>
-      </div>
-    </div>
-
-    <div class="print-info">
-      <div>Application Date & Time: ${new Date().toLocaleString('en-IN')}</div>
-      <div>Reference ID: ${formData.applicationNo || 'N/A'} | OJAL MICRO SERVICE FOUNDATION</div>
-    </div>
-  </div>
-
-  <!-- Page 2: Loan Agreement -->
-  <div class="page">
-    <div class="agreement-header">
-      <div class="logo-container">
-        <img src="/src/assets/ojal-logo.png" alt="OJAL Micro Finance">
-      </div>
-      <div class="company-info">
-        <div class="company-name">OJAL MICRO SERVICE FOUNDATION</div>
-        <div class="company-address">
-          CIN: U88900PN2023NPL219300<br>
-          Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
-          Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
-        </div>
-        <div class="form-title">LOAN AGREEMENT</div>
-      </div>
-    </div>
-    
-    <div class="agreement-content">
-      <p>
-        <strong>This LOAN AGREEMENT "Personal Loan" Agreement executed between</strong>
-      </p>
-      
-      <p>
-        Mr./Miss/Mrs. <strong>${formData.memberName || '[Borrower Name]'}</strong> S/o <strong>${formData.fatherName || '[Father Name]'}</strong>, 
-        R/O <strong>${formData.address || '[Borrower Address]'}</strong> hereinafter referred as "<strong>borrower</strong>".
-      </p>
-      
-      <p>
-        M/s <strong>OJAL MICRO SERVICE FOUNDATION</strong>, a <strong>Private Limited</strong> Company incorporated under the companies act, 2013, 
-        having registered office at <strong>SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015</strong> hereinafter referred as "<strong>Lender</strong>".
-      </p>
-      
-      <p>
-        <strong>IN CONSIDERATION OF</strong> the Lender loaning certain monies (the Loan) to the Borrower, and the Borrower repaying the Loan to the Lender, 
-        the parties agree to keep, perform and fulfill the promises and conditions set out in this Agreement.
-      </p>
-      
-      <p>
-        <strong>WHEREAS</strong> the Borrower is in need of funds and hence has approached the Lender to grant her Rs. ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')} /- 
-        for a period of ${formData.tenure || '0'} Days.
-      </p>
-
-      <div class="agreement-grid">
-        <div class="agreement-box">
-          <div class="agreement-box-title">LOAN DETAILS</div>
-          <div style="font-size: 9px; line-height: 1.4;">
-            <div style="display: flex; justify-content: space-between;">
-              <span>Loan Amount:</span>
-              <span style="font-weight: bold;">₹${formattedLoanAmount}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span>Processing Fee:</span>
-              <span style="font-weight: bold;">₹${parseFloat(formData.processingFee || 0).toLocaleString('en-IN')}</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between;">  
-              <span>Disbursed Amount:</span>
-              <span style="font-weight: bold;">₹${((parseFloat(formData.loanAmount) || 0) - (parseFloat(formData.processingFee) || 0)).toLocaleString('en-IN')}</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between;">
-              <span>Interest Rate:</span>
-              <span style="font-weight: bold;">${formData.roi || '0'}% per annum</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between;">
-              <span>Tenure:</span>
-              <span style="font-weight: bold;">${formData.tenure || '0'} Days</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between;">
-              <span>EMI Amount:</span>
-              <span style="font-weight: bold;">₹${formattedEmiAmount}</span>
-            </div>
-
-            <div style="display: flex; justify-content: space-between;">
-              <span>Total Payable:</span>
-              <span style="font-weight: bold;">₹${totalPayable}</span>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="agreement-box">
-          <div class="agreement-box-title">BORROWER DETAILS</div>
-          <div style="font-size: 9px; line-height: 1.4;">
-            <div><strong>Name:</strong> ${formData.memberName || 'N/A'}</div>
-            <div><strong>Father's Name:</strong> ${formData.fatherName || 'N/A'}</div>
-            <div><strong>Member No:</strong> ${formData.memberNo || 'N/A'}</div>
-            <div><strong>Mobile:</strong> ${formData.mobile || 'N/A'}</div>
-            <div><strong>Purpose:</strong> ${formData.purposeOfLoan || 'N/A'}</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top: 15px;">
-        <div style="margin-bottom: 8px;">
-          <strong>Loan Amount & Interest:</strong>
-          <ol style="margin: 5px 0; padding-left: 15px;">
-            <li>The Borrower hereto, requiring money, has requested the Lender to give her a with interest loan of Rs. ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')} /-</li>
-            <li>The said loan is required by the Borrower for a period of ${formData.tenure || '0'} Days</li>
-            <li>The Borrower hereby agrees and undertakes to return the loan of Rs. ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')} /- within the aforesaid period of ${formData.tenure || '0'} Days and, gives his personal guarantee for the same.</li>
-            <li>The terms and conditions of this Agreement are arrived at by the mutual consent of the parties hereto.</li>
-          </ol>
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Payment:</strong>
-          <ol style="margin: 5px 0; padding-left: 15px;">
-            <li>This Loan will be repaid in full on the due date.</li>
-            <li>At any time while not in default under this Agreement, the Borrower may make lump sum payments or pay the outstanding balance then owing under this agreement to the lender without further bonus or penalty.</li>
-          </ol>
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Default:</strong><br>
-          Notwithstanding anything to the contrary in this agreement, if the Borrower defaults in the performance of any obligation under this agreement, then the lender may declare the amount owing under this Agreement at that time to be immediately due and payable.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Governing Law:</strong><br>
-          This Agreement will be construed in accordance with and governed by the laws of the State.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Cost:</strong><br>
-          The Borrower shall be liable for all costs, expenses and expenditures incurred including, without limitation, the complete legal costs of the lender incurred by enforcing this a result of any default by the Borrower and such costs will be added to the principal then outstanding and shall be due and payable by the Borrower to the Lender immediately upon demand of the Lender.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Binding Effect:</strong><br>
-          This Agreement will pass to the benefit of and be binding upon the respective heirs, executors, administrators, successors and permitted assigns of the Borrower and Lender. The Borrower waives presentment for payment, notice of non-payment, protest, and notice of protest.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Amendments:</strong><br>
-          This Agreement may only be amended or modified by a written instrument executed by both the Borrower and the Lender.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Severability:</strong><br>
-          The Clauses and paragraphs contained in this agreement are intended to be read and construed independently of each other. If any term, covenant, condition or provision of this agreement id held by a court of competent jurisdiction to be invalid, void or unenforceable, it is the parties' intent that such provision be reduced in scope by the court to the extent deemed necessary by the court to render the provision reasonable and enforceable and the remainder of the provisions of this agreement will in no way be affected, i impaired or invalidated as a result.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>General Provisions:</strong><br>
-          Headings are inserted for the convenience of the parties only and are not to be considered when interpreting this agreement. Words in the singular mean and include the plural and vice versa. Words in the masculine mean and include the feminine and vice versa.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>Entire Agreement:</strong><br>
-          This agreement constitutes the entire agreement between the parties and there are no further items or provisions, either oral or otherwise.
-        </div>
-
-        <div style="margin-bottom: 8px;">
-          <strong>IN WITNESS WHEREOF:</strong><br>
-          The parties hereto have hereunto set and subscribed their respective hands the day and year first hereinabove written.
-        </div>
-      </div>
-
-      <div class="agreement-notice">
-        <strong>IMPORTANT NOTICE:</strong><br>
-        By signing this agreement, the Borrower acknowledges having read, understood, and agreed to all the terms 
-        and conditions mentioned herein. This agreement is legally binding and enforceable under Indian law.
-      </div>
-
-      <div class="agreement-checkbox">
-        <strong>I, ${formData.memberName || '[Borrower Name]'}, hereby acknowledge that:</strong><br>
-        • I have read and understood all the terms and conditions of this Loan Agreement<br>
-        • I agree to comply with all the terms mentioned in this agreement<br>
-        • I understand the consequences of default and agree to the penalty structure<br>
-        • All information provided by me is true and accurate to the best of my knowledge<br>
-        • I agree to use the loan amount solely for the stated purpose<br>
-        <strong>I hereby accept this Loan Agreement and agree to be bound by its terms and conditions.</strong>
-      </div>
-    </div>
-
-    <div class="footer-signatures">
-      <div class="signature-section">
-        <div class="signature-box">
-          ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : ''}
-        </div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">Borrower Signature</div>
-        <div style="font-size: 9px;">(${formData.memberName})</div>
-      </div>
-      
-      <div class="signature-section">
-        <div class="signature-box">
-          ${formData.guarantorSignature ? `<img src="${formData.guarantorSignature}" alt="Guarantor Signature">` : ''}
-        </div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">Co-Borrower Signature</div>
-        <div style="font-size: 9px;">(${formData.grantorName})</div>
-      </div>
-      
-      <div class="signature-section">
-        <div class="signature-box"></div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">For OJAL MICRO SERVICE FOUNDATION</div>
-        <div style="font-size: 9px;">(Authorized Signatory)</div>
-      </div>
-    </div>
-
-    <div class="print-info">
-      <div>Agreement Date & Time: ${new Date().toLocaleString('en-IN')}</div>
-      <div>Reference ID: ${formData.applicationNo || 'N/A'} | OJAL MICRO SERVICE FOUNDATION</div>
-    </div>
-  </div>
-
-  <!-- Page 3: EMI Card -->
-  <div class="page">
-    <div class="header">
-      <div class="logo-container">
-        <img src="/src/assets/ojal-logo.png" alt="OJAL Micro Finance">
-      </div>
-      <div class="company-info">
-        <div class="company-name">OJAL MICRO SERVICE FOUNDATION</div>
-        <div class="company-address">
-          CIN: U88900PN2023NPL219300<br>
-          Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
-          Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
-        </div>
-        <div class="form-title">LOAN EMI CARD</div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">Loan Details</div>
-      <div class="section-content">
-        <div class="field-row">
-          <span class="field-label">Branch:</span>
-          <span class="field-value">OJAL MICRO SERVICE FOUNDATION</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Date:</span>
-          <span class="field-value">${new Date().toLocaleDateString('en-GB')}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Customer Name:</span>
-          <span class="field-value">${formData.memberName || 'N/A'}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Contact No:</span>
-          <span class="field-value">${formData.mobile || 'N/A'}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Loan Amount:</span>
-          <span class="field-value">₹ ${parseFloat(formData.loanAmount || 0).toLocaleString('en-IN')}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Processing Fee:</span>
-          <span class="field-value">₹ ${parseFloat(formData.processingFee || 0).toLocaleString('en-IN')}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Disbursed Amount:</span>
-          <span class="field-value">₹ ${parseFloat(formData.disbursedAmount || 0).toLocaleString('en-IN')}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Number of EMI:</span>
-          <span class="field-value">${formData.tenure || '0'}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Plan Name:</span>
-          <span class="field-value">${formData.loanScheme || 'N/A'}</span>
-        </div>
-        <div class="field-row">
-          <span class="field-label">Exit Amount:</span>
-          <span class="field-value">₹ ${totalPayable}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">EMI Schedule Terms</div>
-      <div class="section-content">
-        <table class="emi-table">
-          <thead>
-            <tr>
-              <th style="width: 8%">Sr No.</th>
-              <th style="width: 15%">Loan EMI Date</th>
-              <th style="width: 12%">Interest</th>
-              <th style="width: 12%">Principal</th>
-              <th style="width: 12%">Amount</th>
-              <th style="width: 15%">Receiving Date</th>
-              <th style="width: 12%">Received Amt</th>
-              <th style="width: 7%">Staff Sign</th>
-              <th style="width: 7%">Sign</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${emiSchedule.map(item => `
+      <div class="section">
+        <div class="section-title">EMI Schedule Terms</div>
+        <div class="section-content">
+          <table class="emi-table">
+            <thead>
               <tr>
-                <td>${item.sNo}</td>
-                <td>${item.date}</td>
-                <td>₹${item.interest}</td>
-                <td>₹${item.principal}</td>
-                <td>₹${item.amount}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <th style="width: 8%">Sr No.</th>
+                <th style="width: 15%">Loan EMI Date</th>
+                <th style="width: 12%">Interest</th>
+                <th style="width: 12%">Principal</th>
+                <th style="width: 12%">Amount</th>
+                <th style="width: 15%">Receiving Date</th>
+                <th style="width: 12%">Received Amt</th>
+                <th style="width: 7%">Staff Sign</th>
+                <th style="width: 7%">Sign</th>
               </tr>
-            `).join('')}
-            ${emiSchedule.length === 0 ? '<tr><td colspan="9" style="text-align: center;">No EMI schedule available</td></tr>' : ''}
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- signature after EMI table -->
-
-    <div class="footer-signatures">
-      <div class="signature-section">
-        <div class="signature-box">
-          ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : ''}
+            </thead>
+            <tbody>
+              ${emiSchedule.map(item => `
+                <tr>
+                  <td>${item.sNo}</td>
+                  <td>${item.date}</td>
+                  <td>₹${item.interest}</td>
+                  <td>₹${item.principal}</td>
+                  <td>₹${item.amount}</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              `).join('')}
+              ${emiSchedule.length === 0 ? '<tr><td colspan="9" style="text-align: center;">No EMI schedule available</td></tr>' : ''}
+            </tbody>
+          </table>
         </div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">Applicant Signature</div>
-        <div style="font-size: 9px;">(${formData.memberName})</div>
       </div>
-      
-      <div class="signature-section">
-        <div class="signature-box"></div>
-        <div class="signature-line"></div>
-        <div style="font-size: 10px; font-weight: bold;">For OJAL MICRO SERVICE FOUNDATION</div>
-        <div style="font-size: 9px;">(Authorized Signatory)</div>
+
+      <!-- signature after EMI table -->
+
+      <div class="footer-signatures">
+        <div class="signature-section">
+          <div class="signature-box">
+            ${formData.applicantSignature ? `<img src="${formData.applicantSignature}" alt="Applicant Signature">` : ''}
+          </div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">Applicant Signature</div>
+          <div style="font-size: 9px;">(${formData.memberName})</div>
+        </div>
+        
+        <div class="signature-section">
+          <div class="signature-box"></div>
+          <div class="signature-line"></div>
+          <div style="font-size: 10px; font-weight: bold;">For OJAL MICRO SERVICE FOUNDATION</div>
+          <div style="font-size: 9px;">(Authorized Signatory)</div>
+        </div>
+      </div>
+
+      <div class="print-info">
+        <div>Date & Time: ${new Date().toLocaleString('en-IN')}</div>
+        <div>Reference ID: ${formData.applicationNo || 'N/A'} | OJAL MICRO SERVICE FOUNDATION</div>
       </div>
     </div>
+  </body>
+  </html>`;
 
-    <div class="print-info">
-      <div>Date & Time: ${new Date().toLocaleString('en-IN')}</div>
-      <div>Reference ID: ${formData.applicationNo || 'N/A'} | OJAL MICRO SERVICE FOUNDATION</div>
-    </div>
-  </div>
-</body>
-</html>`;
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
 
-  const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (printWindow) {
+      // Write the content to the new window using DOM methods
+      // It is important to set the document content to avoid overwriting issues.
+      // printWindow.document.body.innerHTML = htmlContent;
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
 
-  if (printWindow) {
-    // Write the content to the new window using DOM methods
-    // It is important to set the document content to avoid overwriting issues.
-    // printWindow.document.body.innerHTML = htmlContent;
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
+      // Use a 'load' event listener instead of a fixed timeout.
+      // This ensures all assets (like images and CSS) have loaded before printing,
+      // which prevents blank pages and missing content.
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    } else {
+      alert('Please allow popups to generate the print window.');
+    }
+  };
 
-    // Use a 'load' event listener instead of a fixed timeout.
-    // This ensures all assets (like images and CSS) have loaded before printing,
-    // which prevents blank pages and missing content.
-    printWindow.onload = () => {
-      printWindow.focus();
-      printWindow.print();
-    };
-  } else {
-    alert('Please allow popups to generate the print window.');
+  //------- handle submit function  ----------------//
+
+   const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  // Validate all required steps
+  const step1Valid = validateStep(1);
+  const step2Valid = validateStep(2);
+
+  if (!step1Valid || !step2Valid) {
+    alert('Please complete all required fields in previous steps');
+    return;
   }
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  if (!isAgreementChecked) {
+    alert('Please agree to the loan agreement terms before submitting');
+    return;
+  }
 
-    // Validate all required steps
-    const step1Valid = validateStep(1);
-    const step2Valid = validateStep(2);
+  setIsSubmitting(true);
 
-    if (!step1Valid || !step2Valid) {
-      alert('Please complete all required fields in previous steps');
-      return;
+  try {
+    // Prepare FormData for backend submission
+    const formDataToSend = new FormData();
+
+    // Create JSON object with non-file fields
+    const jsonData = {};
+    for (let key in formData) {
+      if (formData[key] !== null && !['photo', 'applicantSignature', 'guarantorSignature', 'branchSeal'].includes(key)) {
+        jsonData[key] = formData[key];
+      }
     }
 
-    if (!isAgreementChecked) {
-      alert('Please agree to the loan agreement terms before submitting');
-      return;
+    // Append JSON data as 'formData' part (as expected by backend)
+    formDataToSend.append('formData', new Blob([JSON.stringify(jsonData)], {
+      type: 'application/json'
+    }));
+
+    // Convert data URLs to Blobs for files and append
+    const dataUrlToBlob = (dataUrl, fileName) => {
+      if (!dataUrl) return null;
+      const [header, data] = dataUrl.split(',');
+      const mime = header.match(/:(.*?);/)[1];
+      const byteString = atob(data);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mime });
+    };
+
+    if (formData.photo) {
+      const photoBlob = dataUrlToBlob(formData.photo, 'photo.jpg');
+      formDataToSend.append('photo', photoBlob, 'photo.jpg');
+    }
+    if (formData.applicantSignature) {
+      const applicantSigBlob = dataUrlToBlob(formData.applicantSignature, 'applicantSignature.jpg');
+      formDataToSend.append('applicantSignature', applicantSigBlob, 'applicantSignature.jpg');
+    }
+    if (formData.guarantorSignature) {
+      const guarantorSigBlob = dataUrlToBlob(formData.guarantorSignature, 'guarantorSignature.jpg');
+      formDataToSend.append('guarantorSignature', guarantorSigBlob, 'guarantorSignature.jpg');
+    }
+    if (formData.branchSeal) {
+      const branchSealBlob = dataUrlToBlob(formData.branchSeal, 'branchSeal.jpg');
+      formDataToSend.append('branchSeal', branchSealBlob, 'branchSeal.jpg');
     }
 
-    setIsSubmitting(true);
+    // Submit to backend (use your actual URL)
+    const response = await fetch('http://localhost:8080/api/loans/create-loan', {
+      method: 'POST',
+      body: formDataToSend,
+    });
 
-    try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Generate and download the application PDF
-      await generateStandardPDF();
-
-      // Show success popup
-      setShowSuccessPopup(true);
-      console.log("form data payload :", formData);
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      alert('Error submitting application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    if (!response.ok) {
+      throw new Error('Submission failed');
     }
-  };
+
+    toast.success('Loan application submitted successfully!');
+
+    // Generate and download the application PDF
+    await generateStandardPDF();
+
+    // Show success popup
+    setShowSuccessPopup(true);
+    console.log("form data payload :", formData);
+  } catch (error) {
+    console.error('Error submitting application:', error);
+    toast.error('Error submitting application. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+ //---------------------------------------------------------//
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   // Validate all required steps
+  //   const step1Valid = validateStep(1);
+  //   const step2Valid = validateStep(2);
+
+  //   if (!step1Valid || !step2Valid) {
+  //     alert('Please complete all required fields in previous steps');
+  //     return;
+  //   }
+
+  //   if (!isAgreementChecked) {
+  //     alert('Please agree to the loan agreement terms before submitting');
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+
+  //   try {
+  //     // Simulate form submission
+  //     await new Promise(resolve => setTimeout(resolve, 2000));
+
+  //     // Generate and download the application PDF
+  //     await generateStandardPDF();
+
+  //     // Show success popup
+  //     setShowSuccessPopup(true);
+  //     console.log("form data payload :", formData);
+  //   } catch (error) {
+  //     console.error('Error submitting application:', error);
+  //     alert('Error submitting application. Please try again.');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   const handleDownloadPDF = async () => {
     try {
@@ -1991,7 +2091,7 @@ const LoanApplicationForm = () => {
                       <span className="text-gray-600 w-40">Loan Amount:</span>
                       <span className="font-medium">₹{(parseFloat(formData.loanAmount) || 0).toLocaleString('en-IN')}</span>
                     </div>
-                     <div className="flex">
+                    <div className="flex">
                       <span className="text-gray-600 w-40">Processing Fee:</span>
                       <span className="font-medium">₹{formData.processingFee}</span>
                     </div>
@@ -2008,8 +2108,8 @@ const LoanApplicationForm = () => {
                       <span className="font-medium">₹{formData.emiAmount}</span>
                     </div>
 
-                    
-                     <div className="flex">
+
+                    <div className="flex">
                       <span className="text-gray-600 w-40">Disbursed Amount:</span>
                       <span className="font-medium">₹{((parseFloat(formData.loanAmount) || 0) - (parseFloat(formData.processingFee) || 0)).toLocaleString('en-IN')}</span>
                     </div>
@@ -2313,6 +2413,20 @@ const LoanApplicationForm = () => {
           )}
         </div>
       </form>
+
+      {/* Toast container for notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 };
