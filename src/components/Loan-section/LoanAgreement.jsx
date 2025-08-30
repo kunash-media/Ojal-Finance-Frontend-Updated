@@ -227,7 +227,7 @@ const LoanAgreement = ({ formData, onAgree, isAgreed }) => {
 const LoanApplicationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
-    // applicationNo: '',
+    applicationNo: '',
     purposeOfLoan: '',
     loanScheme: '',
     loanAmount: '',
@@ -284,6 +284,13 @@ const LoanApplicationForm = () => {
     { label: steps[currentStep - 1]?.title || 'Form', current: true }
   ];
 
+  // Function to generate random application number
+  const generateApplicationNumber = () => {
+    const currentYear = new Date().getFullYear();
+    const randomNum = Math.floor(Math.random() * 900000) + 100000; // 6-digit random number
+    return `OJL${currentYear}${randomNum}`;
+  };
+
   useEffect(() => {
     calculateEMI();
   }, [formData.loanAmount, formData.roi, formData.tenure]);
@@ -321,20 +328,6 @@ const LoanApplicationForm = () => {
       setFormData(prev => ({ ...prev, emiAmount: '0' }));
     }
 };
-
-  // const calculateEMI = () => {
-  //   const principal = parseFloat(formData.loanAmount) || 0;
-  //   const rate = (parseFloat(formData.roi) || 0) / 100 / 12;
-  //   const tenure = parseInt(formData.tenure) || 0;
-
-  //   if (principal > 0 && rate > 0 && tenure > 0) {
-  //     const emi = (principal * rate * Math.pow(1 + rate, tenure)) / (Math.pow(1 + rate, tenure) - 1);
-  //     const roundedEMI = Math.round(emi);
-  //     setFormData(prev => ({ ...prev, emiAmount: roundedEMI.toString() }));
-  //   } else {
-  //     setFormData(prev => ({ ...prev, emiAmount: '0' }));
-  //   }
-  // };
 
   const handleFileUpload = (e, type) => {
     const file = e.target.files[0];
@@ -441,6 +434,15 @@ const LoanApplicationForm = () => {
       }
     } else if (!validateStep(currentStep)) {
       return;
+    }
+
+    // Generate application number after completing step 2
+    if (currentStep === 2 && !formData.applicationNo) {
+      const newApplicationNo = generateApplicationNumber();
+      setFormData(prev => ({
+        ...prev,
+        applicationNo: newApplicationNo
+      }));
     }
 
     if (currentStep < 5) {

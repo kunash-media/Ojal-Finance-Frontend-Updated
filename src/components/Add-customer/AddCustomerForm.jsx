@@ -23,10 +23,11 @@ const AddCustomerForm = () => {
         pincode: '',
         branch: '',
         documents: {
-            aadharCard: null,    // Match backend field name (was aadhaar)
-            panCard: null,       // Match backend field name (was pan)
-            voterIdImg: null,    // Match backend field name (was voterId)
-            passPortImg: null,   // Match backend field name (was photo)
+            aadharCard: null, 
+            panCard: null,      
+            voterIdImg: null,    
+            passPortImg: null,   
+            userSignatureImg: null,
         },
     });
 
@@ -98,7 +99,7 @@ const AddCustomerForm = () => {
         const { name, value, files } = e.target;
 
         // Handle document file uploads - updated field names to match backend
-        if (['aadharCard', 'panCard', 'voterIdImg', 'passPortImg'].includes(name)) {
+        if (['aadharCard', 'panCard', 'voterIdImg', 'passPortImg', 'userSignatureImg'].includes(name)) {
             const file = files[0];
             if (file && !file.type.startsWith('image/')) {
                 showToastNotification('Only image files are allowed for documents.', 'error');
@@ -167,6 +168,9 @@ const AddCustomerForm = () => {
             if (formData.documents.voterIdImg) {
                 formDataToSend.append('voterIdImg', formData.documents.voterIdImg);
             }
+            if (formData.documents.userSignatureImg) {
+                formDataToSend.append('userSignatureImg', formData.documents.userSignatureImg);
+            }
 
             // Make API call to backend
             const response = await fetch('http://localhost:8080/api/users/register', {
@@ -221,6 +225,7 @@ const AddCustomerForm = () => {
                 panCard: null,
                 voterIdImg: null,
                 passPortImg: null,
+                userSignatureImg: null,
             },
         });
 
@@ -484,7 +489,8 @@ const AddCustomerForm = () => {
                                 { key: 'aadharCard', label: 'Aadhaar Card' },
                                 { key: 'panCard', label: 'PAN Card' },
                                 { key: 'voterIdImg', label: 'Voter ID' },
-                                { key: 'passPortImg', label: 'Passport Size Photo' }
+                                { key: 'passPortImg', label: 'Passport Size Photo' },
+                                { key: 'userSignatureImg', label: 'User Signatue Photo' }
                             ].map(({ key, label }) => (
                                 <label key={key} className="flex flex-col">
                                     <span className="mb-2 font-semibold text-gray-700">
