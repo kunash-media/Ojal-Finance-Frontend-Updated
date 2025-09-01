@@ -15,6 +15,7 @@ const SanctionsLoan = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [debouncedQuery, setDebouncedQuery] = useState('');
+    // const [documentError, setDocumentError] = useState(null);
 
     // Debounce search input
     useEffect(() => {
@@ -38,6 +39,8 @@ const SanctionsLoan = () => {
 
                 // Fetch loans
                 const loanResponse = await fetch('http://localhost:8080/api/loans/get-all-loans');
+
+                
                 if (loanResponse.ok) {
                     const loanData = await loanResponse.json();
                     setLoans(loanData);

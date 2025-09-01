@@ -280,7 +280,7 @@ const RecurringDeposit = () => {
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan="8" className="py-4 px-4 text-center">No users found</td>
+                <td colSpan="8" className="py-4 px-4 text-center">No User Found!!</td>
               </tr>
             ) : (
               filteredUsers.map((user) => (

@@ -4,135 +4,6 @@ import { Calendar, X, CreditCard, History, Filter } from "lucide-react";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// Dummy data for demonstration
-const DUMMY_DATA = [
-  {
-    userId: "USR001",
-    name:"Sunder Pichai",
-    accountNumber: "SA21391062",
-    createdAt: "2025-01-15T10:30:00",
-    accountStatus: "Active",
-    balance: 15000.00,
-    interestRate: 4.5,
-    transactions: [
-      {
-        id: 1,
-        amount: 5000.00,
-        payMode: "IMPS",
-        utrNo: "IMPS987654321012",
-        cash: null,
-        chequeNumber: null,
-        note: "Salary credit Salary credit Salary credit Salary credit",
-        timestamp: "2025-05-15T14:30:00"
-      },
-      {
-        id: 2,
-        amount: 2000.00,
-        payMode: "Cash",
-        utrNo: null,
-        cash: true,
-        chequeNumber: null,
-        note: "Regular deposit",
-        timestamp: "2025-05-12T11:45:00"
-      },
-      {
-        id: 3,
-        amount: 3500.00,
-        payMode: "Cheque",
-        utrNo: null,
-        cash: null,
-        chequeNumber: "CHQ123456",
-        note: "Monthly deposit",
-        timestamp: "2025-05-05T09:15:00"
-      }
-    ]
-  },
-  {
-    userId: "USR002",
-    name:"Sam Altman",
-    accountNumber: "SA61391062",
-    createdAt: "2025-02-20T09:15:00",
-    accountStatus: "Inactive",
-    balance: 7500.00,
-    interestRate: 3.5,
-    transactions: [
-      {
-        id: 1,
-        amount: 1000.00,
-        payMode: "Cash",
-        utrNo: null,
-        cash: true,
-        chequeNumber: null,
-        note: "Initial deposit",
-        timestamp: "2025-05-10T10:00:00"
-      }
-    ]
-  },
-  {
-    userId: "USR003",
-    name:"Ajay Devgan",
-    accountNumber: "SA71391062",
-    createdAt: "2025-03-05T14:45:00",
-    accountStatus: "Active",
-    balance: 25000.00,
-    interestRate: 5.0,
-    transactions: [
-      {
-        id: 1,
-        amount: 10000.00,
-        payMode: "IMPS",
-        utrNo: "IMPS123456789012",
-        cash: null,
-        chequeNumber: null,
-        note: "Investment deposit",
-        timestamp: "2025-05-18T08:30:00"
-      },
-      {
-        id: 2,
-        amount: 15000.00,
-        payMode: "Cheque",
-        utrNo: null,
-        cash: null,
-        chequeNumber: "CHQ789012",
-        note: "Property rent",
-        timestamp: "2025-05-01T16:20:00"
-      }
-    ]
-  },
-  {
-    userId: "USR004",
-    name:"Sharukh Khan",
-    accountNumber: "SA41391062",
-    createdAt: "2025-03-05T14:45:00",
-    accountStatus: "Active",
-    balance: 25000.00,
-    interestRate: 5.0,
-    transactions: [
-      {
-        id: 1,
-        amount: 10000.00,
-        payMode: "IMPS",
-        utrNo: "IMPS123456789012",
-        cash: null,
-        chequeNumber: null,
-        note: "Investment deposit",
-        timestamp: "2025-05-18T08:30:00"
-      },
-      {
-        id: 2,
-        amount: 15000.00,
-        payMode: "Cheque",
-        utrNo: null,
-        cash: null,
-        chequeNumber: "CHQ789012",
-        note: "Property rent",
-        timestamp: "2025-05-01T16:20:00"
-      }
-    ]
-  }
-];
-
-// 2. ADD THIS DEBOUNCE UTILITY FUNCTION (add at the top of your component, before the DailyCollection function)
 function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
@@ -146,43 +17,98 @@ function debounce(func, wait) {
 }
 
 const DailyCollection = () => {
-  // State management for all components
+  // State management
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [openPayForm, setOpenPayForm] = useState(false);
   const [openHistoryModal, setOpenHistoryModal] = useState(false);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
-  // const [historyFilterDate, setHistoryFilterDate] = useState(null);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
-
-  // State for search functionality
   const [filteredAccounts, setFilteredAccounts] = useState([]);
-  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('name');
+  const [historyFilterFromDate, setHistoryFilterFromDate] = useState(null);
+  const [historyFilterToDate, setHistoryFilterToDate] = useState(null);
+  const [historyFilterPayMode, setHistoryFilterPayMode] = useState('');
 
-  // Form data state
   const [paymentData, setPaymentData] = useState({
     amount: "",
-    payMode: "Cash",
+    payMode: "",
     utrNo: "",
     chequeNumber: "",
     note: ""
   });
 
-  // Fetch data on component mount
+  // Transform API data to match frontend structure
+  const transformAccountData = (apiData) => {
+    return apiData.map(account => ({
+      userId: account.id.toString(),
+      name: account.name,
+      accountNumber: account.accountNumber,
+      createdAt: account.createdAt,
+      accountStatus: account.status === 'ACTIVE' ? 'Active' : 'Inactive',
+      balance: account.currentBalance,
+      interestRate: account.interestRate,
+      transactions: [] // Will be populated when fetching transactions
+    }));
+  };
+
+  const transformTransactionData = (apiData) => {
+    return apiData.map(transaction => ({
+      id: transaction.id,
+      amount: transaction.amount,
+      payMode: transaction.payMode,
+      utrNo: transaction.utrNo !== "NA" ? transaction.utrNo : null,
+      cash: transaction.cash !== "NA" ? transaction.cash : null,
+      chequeNumber: transaction.chequeNumber !== "NA" ? transaction.chequeNumber : null,
+      note: transaction.note !== "NO" ? transaction.note : "",
+      timestamp: transaction.createdAt
+    }));
+  };
+
+  // Fetch all accounts
+  const fetchAccounts = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/saving/get-all-savings-users', {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch accounts');
+      const data = await response.json();
+      const transformedData = transformAccountData(data);
+      setAccounts(transformedData);
+      setFilteredAccounts(transformedData);
+    } catch (error) {
+      console.error('Error fetching accounts:', error);
+      toast.error('Failed to fetch accounts');
+    }
+  };
+
+  // Fetch transactions for a specific account
+  const fetchTransactions = async (accountNumber) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/saving/transactions/get-user-transactions/${accountNumber}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      if (!response.ok) throw new Error('Failed to fetch transactions');
+      const data = await response.json();
+      return transformTransactionData(data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      toast.error('Failed to fetch transactions');
+      return [];
+    }
+  };
+
+  // Fetch accounts on component mount
   useEffect(() => {
-    // This would be replaced with actual API call
     fetchAccounts();
   }, []);
 
-
-  // 1. ADD THESE STATE VARIABLES (add near your existing useState declarations)
-  const [historyFilterFromDate, setHistoryFilterFromDate] = useState(null);
-  const [historyFilterToDate, setHistoryFilterToDate] = useState(null);
-  const [historyFilterPayMode, setHistoryFilterPayMode] = useState('');
-
-  // 2. REPLACE YOUR OLD useEffect WITH THIS ONE
+  // Filter transactions based on date range and payment mode
   useEffect(() => {
     if (selectedAccount && selectedAccount.transactions) {
       let filtered = [...selectedAccount.transactions];
@@ -218,9 +144,7 @@ const DailyCollection = () => {
     }
   }, [historyFilterFromDate, historyFilterToDate, historyFilterPayMode, selectedAccount]);
 
-
-
-  // 3. REPLACE YOUR EXISTING debouncedSearch FUNCTION WITH THIS:
+  // Search functionality
   const debouncedSearch = useCallback(
     debounce((term, type) => {
       if (!term.trim()) {
@@ -238,18 +162,15 @@ const DailyCollection = () => {
     [accounts]
   );
 
-  // 4. ADD THIS useEffect (this handles initial load and search functionality)
   useEffect(() => {
     if (accounts.length > 0) {
       setFilteredAccounts(accounts);
     }
   }, [accounts]);
 
-  // Handle search input change
   useEffect(() => {
     debouncedSearch(searchTerm, searchType);
   }, [searchTerm, searchType, debouncedSearch]);
-
 
   // Reset filters when modal is closed
   useEffect(() => {
@@ -260,46 +181,12 @@ const DailyCollection = () => {
     }
   }, [openHistoryModal]);
 
-
-
-
-  // Filter transactions when date filter changes
-  // useEffect(() => {
-  //   if (selectedAccount && selectedAccount.transactions) {
-  //     if (historyFilterDate) {
-  //       const filterDate = new Date(historyFilterDate);
-  //       const filtered = selectedAccount.transactions.filter(transaction => {
-  //         const transactionDate = new Date(transaction.timestamp);
-  //         return (
-  //           transactionDate.getDate() === filterDate.getDate() &&
-  //           transactionDate.getMonth() === filterDate.getMonth() &&
-  //           transactionDate.getFullYear() === filterDate.getFullYear()
-  //         );
-  //       });
-  //       setFilteredTransactions(filtered);
-  //     } else {
-  //       // When no filter is applied, show all transactions sorted by most recent
-  //       setFilteredTransactions([...selectedAccount.transactions].sort((a, b) => 
-  //         new Date(b.timestamp) - new Date(a.timestamp)
-  //       ));
-  //     }
-  //   }
-  // }, [historyFilterDate, selectedAccount]);
-
-  // Mock API call function (to be replaced with actual API)
-  const fetchAccounts = () => {
-    // Simulate API delay
-    setTimeout(() => {
-      setAccounts(DUMMY_DATA);
-    }, 500);
-  };
-
   // Handle pay button click
   const handlePayClick = (account) => {
     setSelectedAccount(account);
     setPaymentData({
       amount: "",
-      payMode: "Cash",
+      payMode: "CASH",
       utrNo: "",
       chequeNumber: "",
       note: ""
@@ -307,17 +194,23 @@ const DailyCollection = () => {
     setOpenPayForm(true);
   };
 
-  // Updated Handle history button click function
-  const handleHistoryClick = (account) => {
+  // Handle history button click
+  const handleHistoryClick = async (account) => {
     setSelectedAccount(account);
-
-    // Reset all filter states to null/empty
-    setHistoryFilterFromDate(null);
-    setHistoryFilterToDate(null);
-    setHistoryFilterPayMode('');
-
-    // Initial load of all transactions sorted by most recent
-    setFilteredTransactions([...account.transactions].sort((a, b) =>
+    
+    // Fetch transactions for the selected account
+    const transactions = await fetchTransactions(account.accountNumber);
+    
+    // Update selected account with transactions
+    const updatedAccount = {
+      ...account,
+      transactions: transactions
+    };
+    
+    setSelectedAccount(updatedAccount);
+    
+    // Set filtered transactions (initially all transactions, sorted)
+    setFilteredTransactions([...transactions].sort((a, b) =>
       new Date(b.timestamp) - new Date(a.timestamp)
     ));
 
@@ -336,66 +229,129 @@ const DailyCollection = () => {
   // Handle payment form submission
   const handlePaymentSubmit = (e) => {
     e.preventDefault();
-    // Validate form data before proceeding
     if (!paymentData.amount || parseFloat(paymentData.amount) <= 0) {
-      alert("Please enter a valid amount");
+      toast.error("Please enter a valid amount");
       return;
     }
-
-    // Open confirmation modal with the payment details
     setOpenConfirmModal(true);
   };
 
-  // Handle final payment submission after confirmation
-  const handleFinalSubmit = () => {
-    // Here would be the actual API call to submit the payment
-    console.log("Submitting payment:", {
-      accountId: selectedAccount.accountNumber,
-      ...paymentData
-    });
 
-    // Prepare payload based on selected payment mode
-    const payload = {
-      amount: parseFloat(paymentData.amount),
-      payMode: paymentData.payMode,
-      utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : null,
-      cash: paymentData.payMode === "Cash" ? true : null,
-      chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : null,
-      note: paymentData.note
-    };
+    // Handle final payment submission
+  const handleFinalSubmit = async () => {
+    try {
+      // Prepare payload for API
+      const payload = {
+        amount: parseFloat(paymentData.amount),
+        payMode: paymentData.payMode,
+        utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : "NA",
+        cash: paymentData.payMode === "CASH" ? paymentData.amount.toString() : "NA",
+        chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : "NA",
+        note: paymentData.note || "NO"
+      };
 
-    console.log("Backend payload:", payload);
+      // Make API call to submit payment
+      const response = await fetch(`http://localhost:8080/api/saving/transactions/create-transaction/${selectedAccount.accountNumber}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
 
-    // For demo, update the local state with the new transaction
-    const newTransaction = {
-      id: Date.now(),
-      amount: parseFloat(paymentData.amount),
-      payMode: paymentData.payMode,
-      utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : null,
-      cash: paymentData.payMode === "Cash" ? true : null,
-      chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : null,
-      note: paymentData.note,
-      timestamp: new Date().toISOString()
-    };
+      if (!response.ok) throw new Error('Failed to submit payment');
 
-    // Update the accounts state with the new transaction
-    const updatedAccounts = accounts.map(account => {
-      if (account.userId === selectedAccount.userId) {
-        return {
-          ...account,
-          transactions: [newTransaction, ...account.transactions],
-          balance: account.balance + parseFloat(paymentData.amount)
-        };
-      }
-      return account;
-    });
+      // Update local state
+      const newTransaction = {
+        id: Date.now(), // Ideally, get this from the API response
+        amount: parseFloat(paymentData.amount),
+        payMode: paymentData.payMode,
+        utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : null,
+        cash: paymentData.payMode === "CASH" ? paymentData.amount.toString() : null,
+        chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : null,
+        note: paymentData.note || "",
+        timestamp: new Date().toISOString()
+      };
 
-    setAccounts(updatedAccounts);
-    setOpenConfirmModal(false);
-    setOpenPayForm(false);
-    toast.success('Payment Added successfully!');
+      const updatedAccounts = accounts.map(account => {
+        if (account.accountNumber === selectedAccount.accountNumber) {
+          return {
+            ...account,
+            transactions: [...(account.transactions || []), newTransaction],
+            balance: account.balance + parseFloat(paymentData.amount)
+          };
+        }
+        return account;
+      });
 
+      setAccounts(updatedAccounts);
+      setFilteredAccounts(updatedAccounts);
+      setOpenConfirmModal(false);
+      setOpenPayForm(false);
+      toast.success('Payment added successfully!');
+    } catch (error) {
+      console.error('Error submitting payment:', error);
+      toast.error('Failed to submit payment');
+    }
   };
+  // Handle final payment submission
+  // const handleFinalSubmit = async () => {
+  //   try {
+  //     // Prepare payload for API
+  //     const payload = {
+  //       amount: parseFloat(paymentData.amount),
+  //       payMode: paymentData.payMode,
+  //       utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : "NA",
+  //       cash: paymentData.payMode === "CASH" ? paymentData.amount.toString() : "NA",
+  //       chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : "NA",
+  //       note: paymentData.note || "NO",
+  //       accountNumber: selectedAccount.accountNumber
+  //     };
+
+  //     // Make API call to submit payment
+  //     const response = await fetch('http://localhost:8080/api/saving/transactions/add-transaction', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify(payload)
+  //     });
+
+  //     if (!response.ok) throw new Error('Failed to submit payment');
+
+  //     // Update local state
+  //     const newTransaction = {
+  //       id: Date.now(), // Ideally, get this from the API response
+  //       amount: parseFloat(paymentData.amount),
+  //       payMode: paymentData.payMode,
+  //       utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : null,
+  //       cash: paymentData.payMode === "CASH" ? paymentData.amount.toString() : null,
+  //       chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : null,
+  //       note: paymentData.note || "",
+  //       timestamp: new Date().toISOString()
+  //     };
+
+  //     const updatedAccounts = accounts.map(account => {
+  //       if (account.accountNumber === selectedAccount.accountNumber) {
+  //         return {
+  //           ...account,
+  //           transactions: [...(account.transactions || []), newTransaction],
+  //           balance: account.balance + parseFloat(paymentData.amount)
+  //         };
+  //       }
+  //       return account;
+  //     });
+
+  //     setAccounts(updatedAccounts);
+  //     setFilteredAccounts(updatedAccounts);
+  //     setOpenConfirmModal(false);
+  //     setOpenPayForm(false);
+  //     toast.success('Payment added successfully!');
+  //   } catch (error) {
+  //     console.error('Error submitting payment:', error);
+  //     toast.error('Failed to submit payment');
+  //   }
+  // };
 
   // Helper function to format date and time
   const formatDateTime = (timestamp) => {
@@ -420,6 +376,7 @@ const DailyCollection = () => {
     });
   };
 
+  // Rest of the JSX remains exactly the same as the original code
   return (
     <div className="container mx-auto px-4 ">
       {/* Info section at the top */}
@@ -445,15 +402,14 @@ const DailyCollection = () => {
           />
         </div>
         <div className="w-48">
-        <select
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-        >
-          <option value="name">Search by Name</option>
-          <option value="accountNumber">Search by Account Number</option>
-          {/* <option value="userId">Search by User ID</option> */}
-        </select>
+          <select
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="name">Search by Name</option>
+            <option value="accountNumber">Search by Account Number</option>
+          </select>
         </div>
       </div>
 
@@ -474,7 +430,7 @@ const DailyCollection = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredAccounts.map((account) => (
+            { accounts.length !== 0 && filteredAccounts.length !== 0 ? (filteredAccounts.map((account) => (
               <tr
                 key={account.userId}
                 className={`border-b ${account.accountStatus === 'Active' ? 'bg-white' : 'bg-gray-50'}`}
@@ -484,8 +440,7 @@ const DailyCollection = () => {
                 <td className="py-3 px-5">{account.accountNumber}</td>
                 <td className="py-3 px-5">{formatDateTime(account.createdAt)}</td>
                 <td className="py-3 px-5">
-                  <span className={`px-2 py-1 rounded-full text-xs ${account.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs ${account.accountStatus === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                     {account.accountStatus}
                   </span>
                 </td>
@@ -510,7 +465,9 @@ const DailyCollection = () => {
                   </button>
                 </td>
               </tr>
-            ))}
+            ))) : <tr>
+                   <td colSpan="8" className="text-semibold text-center align-middle py-4">No User Found!!</td>
+              </tr>}
           </tbody>
         </table>
       </div>
@@ -570,7 +527,7 @@ const DailyCollection = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                 >
-                  <option value="Cash">Cash</option>
+                  <option value="CASH">Cash</option>
                   <option value="IMPS">IMPS</option>
                   <option value="Cheque">Cheque</option>
                 </select>
@@ -738,7 +695,6 @@ const DailyCollection = () => {
 
             {/* Enhanced Filter Section */}
             <div className="sticky top-14 z-10 bg-white border-b px-4 py-3">
-              {/* Date Range Filters */}
               <div className="flex flex-wrap items-end gap-3 mb-3">
                 <div className="flex-grow min-w-36">
                   <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="filterFromDate">
@@ -777,26 +733,22 @@ const DailyCollection = () => {
                     className="w-full px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-teal-500"
                   >
                     <option value="">All Modes</option>
+                    <option value="CASH">Cash</option>
                     <option value="IMPS">IMPS</option>
-                    <option value="Cash">Cash</option>
                     <option value="Cheque">Cheque</option>
-                    {/* <option value="NEFT">NEFT</option>
-              <option value="RTGS">RTGS</option>
-              <option value="UPI">UPI</option> */}
                   </select>
                 </div>
               </div>
 
-              {/* Clear Filters Button */}
               {(historyFilterFromDate || historyFilterToDate || historyFilterPayMode) && (
                 <div className="flex justify-end">
                   <button
-                    className="text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 flex items-center"
+                    className="text-sm px-theory
                     onClick={() => {
                       setHistoryFilterFromDate(null);
                       setHistoryFilterToDate(null);
                       setHistoryFilterPayMode('');
-                    }}
+                    }}"
                   >
                     <Filter className="w-3 h-3 mr-1" />
                     Clear All Filters
@@ -805,7 +757,6 @@ const DailyCollection = () => {
               )}
             </div>
 
-            {/* Transaction List */}
             <div className="overflow-y-auto flex-grow p-4">
               {filteredTransactions.length === 0 ? (
                 <div className="p-4 text-center">
@@ -840,11 +791,11 @@ const DailyCollection = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                         <p className="text-gray-700">
                           <span className="font-semibold">Mode:</span> {transaction.payMode}
-                          {transaction.utrNo && ` (UTR: ${transaction.utrNo})`}
-                          {transaction.chequeNumber && ` (Cheque: ${transaction.chequeNumber})`}
+                          <span className="font-semibold">{transaction.utrNo && ` (UTR No: ${transaction.utrNo})`}
+                          {transaction.chequeNumber && ` (Cheque No: ${transaction.chequeNumber})`}</span>
                         </p>
                         <p className="text-gray-700">
-                          <span className="font-semibold">Note:</span> {transaction.note || '-'}
+                          <span className="font-semibold ">Note:</span>  <span className="font-semibold text-yellow-700">{transaction.note || 'no note'}</span>
                         </p>
                       </div>
                     </div>
@@ -856,7 +807,6 @@ const DailyCollection = () => {
         </div>
       )}
 
-      {/* Toast notifications container */}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
