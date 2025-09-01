@@ -13,6 +13,7 @@ import RecurringDeposit from "./components/Recurring-deposit/RecurringDeposit.js
 import FixedDeposit from "./components/Fixed-Deposit/FixedDeposit.jsx";
 import UserList from "./components/Users-list/UserList.jsx";
 import LoanApplicationForm from "./components/Loan-section/LoanAgreement.jsx";
+import SanctionsLoan from "./components/Loan-section/Sanctions-Loan/SanctionsLoan.jsx";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
                 <Route path = "create-rd" element={<RecurringDeposit/>} />
                 <Route path = "create-fd" element={<FixedDeposit />} />
                 <Route path = "apply-loan" element={<LoanApplicationForm/>} />
+                <Route path = "sanctions-loan-list" element={<SanctionsLoan/>}/>
                 <Route path = "reports" element={<PagePlaceholder title="Reports"/>} />
                 <Route path = "daily-collection" element={<DailyCollection/>}/>
                 <Route path = "all-customers" element={<UserList/>}/>

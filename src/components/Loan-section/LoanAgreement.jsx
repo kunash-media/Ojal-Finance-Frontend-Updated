@@ -115,7 +115,7 @@ const LoanAgreement = ({ formData, onAgree, isAgreed }) => {
               <div className="space-y-1 text-sm">
                 <div><strong>Name:</strong> {formData.memberName || 'N/A'}</div>
                 <div><strong>Father's Name:</strong> {formData.fatherName || 'N/A'}</div>
-                <div><strong>Member No:</strong> {formData.memberNo || 'N/A'}</div>
+                {/* <div><strong>Member No:</strong> {formData.memberNo || 'N/A'}</div> */}
                 <div><strong>Mobile:</strong> {formData.mobile || 'N/A'}</div>
                 <div><strong>Purpose:</strong> {formData.purposeOfLoan || 'N/A'}</div>
               </div>
@@ -238,7 +238,6 @@ const LoanApplicationForm = () => {
     appliedDate: new Date().toISOString().split('T')[0],
     tenure: '',
     emiAmount: '',
-    // memberNo: '',
     memberName: '',
     fatherName: '',
     mobile: '',
@@ -833,7 +832,7 @@ const LoanApplicationForm = () => {
           <div class="company-address">
             CIN: U88900PN2023NPL219300<br>
             Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
-            Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+            Email: ojalmicroservicefoundation.obs@gmail.com | Phone: +91-7499552539
           </div>
           <div class="form-title">LOAN APPLICATION FORM</div>
         </div>
@@ -898,10 +897,7 @@ const LoanApplicationForm = () => {
           <div class="section">
             <div class="section-title">Applicant Details</div>
             <div class="section-content">
-              <div class="field-row">
-                <span class="field-label">Member No:</span>
-                <span class="field-value">${formData.memberNo || 'N/A'}</span>
-              </div>
+             
               <div class="field-row">
                 <span class="field-label">Member Name:</span>
                 <span class="field-value">${formData.memberName || 'N/A'}</span>
@@ -1032,7 +1028,7 @@ const LoanApplicationForm = () => {
           <div class="company-address">
             CIN: U88900PN2023NPL219300<br>
             Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
-            Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+            Email: ojalmicroservicefoundation.obs@gmail.com | Phone: +91-7499552539
           </div>
           <div class="form-title">LOAN AGREEMENT</div>
         </div>
@@ -1109,7 +1105,6 @@ const LoanApplicationForm = () => {
             <div style="font-size: 9px; line-height: 1.4;">
               <div><strong>Name:</strong> ${formData.memberName || 'N/A'}</div>
               <div><strong>Father's Name:</strong> ${formData.fatherName || 'N/A'}</div>
-              <div><strong>Member No:</strong> ${formData.memberNo || 'N/A'}</div>
               <div><strong>Mobile:</strong> ${formData.mobile || 'N/A'}</div>
               <div><strong>Purpose:</strong> ${formData.purposeOfLoan || 'N/A'}</div>
             </div>
@@ -1242,7 +1237,7 @@ const LoanApplicationForm = () => {
           <div class="company-address">
             CIN: U88900PN2023NPL219300<br>
             Address: SN73 Adarsh Nagar, Ashtavinayak Colony, Dighi Pune -411015<br>
-            Email: support@ojalmicrofoundation.in | Phone: +91-XXXXXXXXXX
+            Email: ojalmicroservicefoundation.obs@gmail.com | Phone: +91-7499552539
           </div>
           <div class="form-title">LOAN EMI CARD</div>
         </div>
@@ -2134,10 +2129,7 @@ const LoanApplicationForm = () => {
                       <span className="text-gray-600 w-40">Mobile No:</span>
                       <span className="font-medium">{formData.mobile}</span>
                     </div>
-                    <div className="flex">
-                      <span className="text-gray-600 w-40">Member No:</span>
-                      <span className="font-medium">{formData.memberNo || 'N/A'}</span>
-                    </div>
+                    
                     <div className="flex">
                       <span className="text-gray-600 w-40">Date of Joining:</span>
                       <span className="font-medium">{new Date(formData.dateOfJoining).toLocaleDateString('en-GB')}</span>
