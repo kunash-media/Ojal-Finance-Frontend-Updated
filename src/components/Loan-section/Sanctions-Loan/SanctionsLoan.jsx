@@ -111,8 +111,8 @@ const SanctionsLoan = () => {
     // Error state
     if (error) {
         return (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-700">Error loading loans: {error}</p>
+            <div className="bg-red-50 border border-red-200 text-center rounded-lg p-4 ">
+                <p className="text-red-700 m-5">Error loading loans: {error}</p>
                 <button
                     onClick={() => setLoading(true)}
                     className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
