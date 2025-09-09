@@ -5,6 +5,10 @@ import { useUsers } from '../../context/UserContext';
 import { useAuth } from '../../context/AuthContext';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import EditNoteIcon from '@mui/icons-material/EditNote';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import ojalLogo from '../../assets/ojal-logo.png';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 // import { History } from 'lucide-react';
 import "./RecurringDeposit.css";
 
@@ -47,7 +51,65 @@ const RecurringDeposit = () => {
   const branchName = user?.branchName || "NA";
   const [adminBranch, setAdminBranch] = useState(branchName);
 
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState(null);
+
+  // Number to words function
+  const numberToWords = (num) => {
+    if (num === 0) return 'Zero';
+
+    const belowTwenty = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+    const thousands = ['', 'Thousand', 'Lakh', 'Crore'];
+
+    function helper(n) {
+      if (n === 0) return '';
+      if (n < 20) return belowTwenty[n] + ' ';
+      if (n < 100) return tens[Math.floor(n / 10)] + ' ' + helper(n % 10);
+      if (n < 1000) return belowTwenty[Math.floor(n / 100)] + ' Hundred ' + helper(n % 100);
+      if (n < 100000) return helper(Math.floor(n / 1000)) + ' Thousand ' + helper(n % 1000);
+      if (n < 10000000) return helper(Math.floor(n / 100000)) + ' Lakh ' + helper(n % 100000);
+      return helper(Math.floor(n / 10000000)) + ' Crore ' + helper(n % 10000000);
+    }
+
+    return helper(num).trim() + ' Rupees Only';
+  };
+
+  // Handle receipt click
+  const handleReceiptClick = (account) => {
+    setSelectedAccount(account);
+    setIsReceiptModalOpen(true);
+  };
+
+  // Handle print
+  const handlePrint = () => {
+    const content = document.getElementById('receipt-content').innerHTML;
+    const printWindow = window.open('', '', 'height=600, width=800');
+    printWindow.document.write('<html><head><title>RD Receipt</title>');
+    printWindow.document.write('<style>body { font-family: Arial, sans-serif; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid black; padding: 5px; text-align: center; } .red-bg { background-color: red; color: white; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(content);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+  // Handle download PDF
+  const handleDownload = () => {
+    const input = document.getElementById('receipt-content');
+    html2canvas(input, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const width = pdf.internal.pageSize.getWidth();
+      const height = (canvas.height * width) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, width, height);
+      pdf.save(`RD_Receipt_${selectedAccount.accountNumber}.pdf`);
+    });
+  };
+
   // Fetch RD accounts data
+
+
   const fetchRdAccountsData = useCallback(async () => {
     if (!adminBranch || adminBranch === "NA" || !users || users.length === 0) {
       setUserRdAccountsMap(new Map());
@@ -642,7 +704,7 @@ const RecurringDeposit = () => {
       </div>
 
       {/* Table Section */}
-      <div className="rd-table-container overflow-x-auto h-[400px]">
+      <div className="rd-table-container overflow-x-auto h-[500px]">
         <table className="min-w-full bg-white border border-gray-300 rounded-md">
           <thead className="sticky top-0 z-50">
             <tr className="bg-gray-100">
@@ -794,39 +856,39 @@ const RecurringDeposit = () => {
               Confirm Recurring Deposit {currentRdAccountStatus ? 'Update' : 'Creation'}
             </h2>
             <div className="mb-6">
-              <h3 className="mb-3 text-lg font-semibold">User Information</h3>
+              <h3 className="mb-3 text-lg font-bold text-teal-700">User Information :</h3>
               <div className="rd-detail-item">
                 <span className="font-semibold">Name:</span>
-                <span>{selectedUser?.firstName} {selectedUser?.middleName && selectedUser?.middleName !== 'NA' ? selectedUser?.middleName + ' ' : ''}{selectedUser?.lastName}</span>
+                <span className="ml-5">{selectedUser?.firstName} {selectedUser?.middleName && selectedUser?.middleName !== 'NA' ? selectedUser?.middleName + ' ' : ''}{selectedUser?.lastName}</span>
               </div>
               <div className="rd-detail-item">
                 <span className="font-semibold">Mobile:</span>
-                <span>{selectedUser?.mobile}</span>
+                <span className="ml-3">{selectedUser?.mobile}</span>
               </div>
               <div className="rd-detail-item">
                 <span className="font-semibold">Email:</span>
-                <span>{selectedUser?.email}</span>
+                <span className="ml-3">{selectedUser?.email}</span>
               </div>
               <div className="rd-detail-item">
                 <span className="font-semibold">Branch:</span>
-                <span>{selectedUser?.branch}</span>
+                <span  className="ml-2 bg-purple-800 rounded-lg px-2 text-white border-2 border-purple-300" >{selectedUser?.branch}</span>
               </div>
-              <h3 className="mb-3 mt-4 text-lg font-semibold">RD Details</h3>
+              <h3 className="mb-3 mt-4 text-lg font-bold text-teal-700">RD Details :</h3>
               <div className="rd-detail-item">
                 <span className="font-semibold">Deposit Amount:</span>
-                <span>₹{parseFloat(rdFormData.depositAmount || 0).toFixed(2)}</span>
+                <span className="ml-3">₹{parseFloat(rdFormData.depositAmount || 0).toFixed(2)}</span>
               </div>
               <div className="rd-detail-item">
                 <span className="font-semibold">Interest Rate:</span>
-                <span>{parseFloat(rdFormData.interestRate || 0).toFixed(2)}%</span>
+                <span className="ml-3">{parseFloat(rdFormData.interestRate || 0).toFixed(2)}%</span>
               </div>
               <div className="rd-detail-item">
                 <span className="font-semibold">Tenure:</span>
-                <span>{rdFormData.tenureMonths} months</span>
+                <span className="ml-3">{rdFormData.tenureMonths} months</span>
               </div>
               <div className="rd-detail-item">
                 <span className="font-semibold">Maturity Amount (Approx):</span>
-                <span>₹{calculateMaturityAmount()}</span>
+                <span className="ml-3 bg-purple-800 rounded-lg px-2 text-white border-2 border-purple-300">₹{calculateMaturityAmount()}</span>
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-4 border-t border-gray-200">
@@ -907,7 +969,7 @@ const RecurringDeposit = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-teal-700">RD Account History for {selectedUser?.firstName} {selectedUser?.lastName}</h2>
+              <h2 className="text-xl font-bold text-teal-700">RD Account History for ({selectedUser?.firstName} {selectedUser?.lastName})</h2>
               <button 
                 className="text-2xl text-gray-500 hover:text-gray-700"
                 onClick={() => setIsHistoryModalOpen(false)}
@@ -916,11 +978,11 @@ const RecurringDeposit = () => {
               </button>
             </div>
             <div className="mb-4 border-b border-gray-200 pb-2">
-              <p><span className="font-semibold">User ID:</span> {selectedUser?.userId}</p>
-              <p><span className="font-semibold">Mobile:</span> {selectedUser?.mobile}</p>
-              <p><span className="font-semibold">Email:</span> {selectedUser?.email}</p>
-              <p><span className="font-semibold">Branch:</span> {selectedUser?.branch}</p>
-              <p><span className="font-semibold">Total RDs :</span> {userRdAccountsMap.get(selectedUser?.userId)?.rdAccounts?.length}</p>
+              <p className="mb-2"><span className="font-semibold">User ID:</span> {selectedUser?.userId}</p>
+              <p className="mb-2"><span className="font-semibold">Mobile:</span> {selectedUser?.mobile}</p>
+              <p className="mb-2"><span className="font-semibold">Email:</span> {selectedUser?.email}</p>
+              <p className="mb-2"><span className="font-semibold">Branch:</span> <span  className="bg-purple-800 rounded-lg px-2 text-white border-2 border-purple-300">{selectedUser?.branch}</span> </p>
+              <p className="mb-2"><span className="font-semibold">Total RDs :</span> {userRdAccountsMap.get(selectedUser?.userId)?.rdAccounts?.length}</p>
               <div className="flex justify-end gap-2 mt-2">
                 <button
                   className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors"
@@ -938,15 +1000,15 @@ const RecurringDeposit = () => {
             </div>
             <div className="max-h-64 overflow-y-auto">
               {userRdAccountsMap.get(selectedUser?.userId)?.rdAccounts?.map(account => (
-                <div key={account.accountNumber} className="mb-3 p-3 border rounded-md bg-gray-50">
-                  <p><span className="font-semibold">Account Number:</span> {account.accountNumber}</p>
-                  <p><span className="font-semibold">Deposit Amount:</span> ₹{account.depositAmount.toFixed(2)}</p>
-                  <p><span className="font-semibold">Interest Rate:</span> {account.interestRate.toFixed(2)}%</p>
-                  <p><span className="font-semibold">Tenure:</span> {account.tenureMonths} months</p>
-                  <p><span className="font-semibold">Maturity Amount:</span> ₹{account.maturityAmount.toFixed(2)}</p>
-                  <p><span className="font-semibold">Maturity Date:</span> {account.maturityDate}</p>
-                  <p><span className="font-semibold">Status:</span> {account.status}</p>
-                  <p><span className="font-semibold">Created At:</span> {account.createdAt}</p>
+                <div key={account.accountNumber} className="mb-3 p-3 border border-teal-600 rounded-md bg-gray-50">
+                  <p className="mb-2"><span className="font-semibold">Account Number:</span> {account.accountNumber}</p>
+                  <p className="mb-2"><span className="font-semibold">Deposit Amount:</span> ₹{account.depositAmount.toFixed(2)}</p>
+                  <p className="mb-2"><span className="font-semibold">Interest Rate:</span> {account.interestRate.toFixed(2)}%</p>
+                  <p className="mb-2"><span className="font-semibold">Tenure:</span> {account.tenureMonths} months</p>
+                  <p className="mb-2"><span className="font-semibold">Maturity Amount:</span> <span className="bg-purple-800 rounded-lg px-2 text-white border-2 border-purple-300">₹{account.maturityAmount.toFixed(2)}</span> </p>
+                  <p className="mb-2"><span className="font-semibold">Maturity Date:</span> {account.maturityDate}</p>
+                  <p className="mb-2"><span className="font-semibold">Status:</span> <span className="bg-green-700 rounded-lg px-2 text-white border-2 border-green-300">{account.status}</span> </p>
+                  <p className="mb-2"><span className="font-semibold">A/C Open Date:</span> {account.createdAt}</p>
                   <div className="flex justify-end gap-2 mt-2">
                     <button
                       className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
@@ -962,6 +1024,13 @@ const RecurringDeposit = () => {
                     >
                       <DeleteOutline fontSize="small" />
                     </button>
+                    <button
+                      className="bg-purple-700 text-white px-2 py-1 rounded hover:bg-purple-600 transition-colors"
+                      onClick={() => handleReceiptClick(account)}
+                      title="Receipt"
+                    >
+                      <ReceiptLongIcon fontSize="small" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -969,6 +1038,94 @@ const RecurringDeposit = () => {
           </div>
         </div>
       )}
+
+
+ {/*----- Receipt model----------*/}
+
+  {isReceiptModalOpen && selectedAccount && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl overflow-auto h-[550px] relative">
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white z-10">
+          <h2 className="text-xl font-bold">RD Receipt</h2>
+          <button 
+            className="text-2xl text-gray-500 hover:text-gray-700"
+            onClick={() => setIsReceiptModalOpen(false)}
+          >
+            &times;
+          </button>
+        </div>
+        <div id="receipt-content" style={{ border: '2px solid orange', backgroundColor: 'white', padding: '10px', fontFamily: 'Arial, sans-serif', fontSize: '12px', position: 'relative' }}>
+          <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+            <img src={ojalLogo} alt="OJAL Logo" style={{ width: '100px', marginRight:"40px", display: 'inline-block', verticalAlign: 'middle' }} />
+            <h1 style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '80px', marginBottom:"45px", fontSize: '24px' }}>OJAL MICRO SERVICE FOUNDATION</h1>
+          </div>
+          <p className="font-semibold" style={{ textAlign: 'center' }}>CIN No.: U88900PN2023NPL219300</p>
+          <p style={{ textAlign: 'center' }}>ADDRESS: REGULATED AND CONTROLLED BY MINISTRY OF CORPORATE AFFAIRS, GOVT. OF INDIA. : S/N 73 शिवनगरी, हिंदू कॉलनी, दिघी, पुणे - 411015</p>
+          <p style={{ textAlign: 'center' }}>CONTACT NO. : <span className="font-bold">7499552539, 8830126738</span>    • EMAIL ID: <span className="font-bold">ojalmicroservicefoundation.obs@gmail.com</span></p>
+          <div className="text-center" style={{ backgroundColor: 'orange', color: 'white',  padding: '5px', fontSize: '18px', marginTop: '12px', position: 'relative' }}><h2 className="mb-3 font-bold" >आवर्ती ठेव / RECURRING DEPOSIT</h2></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
+            <div className="font-semibold" style={{ width: '48%' }}>
+              <p>जारी करणारी शाखा / Issuing Branch: {selectedUser.branch}</p>
+              <p>Received with thanks from:</p>
+              <p>श्री / श्रीमती / Shri / Smt. {selectedUser.firstName} {selectedUser.middleName && selectedUser.middleName !== 'NA' ? selectedUser.middleName + ' ' : ''}{selectedUser.lastName}</p>
+              <p>संयुक्त अर्जदाराचे नाव / Joint Applicant Name: </p>
+              <p>नामनिर्देशित व्यक्ती / Nominee: </p>
+            </div>
+            <div className="font-semibold" style={{ width: '48%' }}>
+              <p>प्रमाणपत्र क्रमांक / Certificate No.: ................</p>
+              <p>सदस्य आयडी / Member ID: {selectedUser.userId}</p>
+              <p>खाते क्रमांक / Account No.: {selectedAccount.accountNumber}</p>
+              <p>योजना / Scheme: </p>
+              <p>पूर्ण पी ए आउट / M. Pay Out: </p>
+            </div>
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px', tableLayout: 'fixed', border: '1px solid black' }}>
+            <thead>
+              <tr className="red-bg">
+                <th style={{ padding: '8px', textAlign: 'center', width: '16.67%', border: '1px solid black' }}>ठेव करण्याची तारीख / Deposit Date</th>
+                <th style={{ padding: '8px', textAlign: 'center', width: '16.67%', border: '1px solid black' }}>ठेव रक्कम (रुपये) / Deposit Amount(Rs.)</th>
+                <th style={{ padding: '8px', textAlign: 'center', width: '16.67%', border: '1px solid black' }}>कालावधी (महिने) / Period (Months)</th>
+                <th style={{ padding: '8px', textAlign: 'center', width: '16.67%', border: '1px solid black' }}>व्याज दर / Rate of Interest</th>
+                <th style={{ padding: '8px', textAlign: 'center', width: '16.67%', border: '1px solid black' }}>परिपक्वता तारीख / Maturity Date</th>
+                <th style={{ padding: '8px', textAlign: 'center', width: '16.67%', border: '1px solid black' }}>परिपक्वता रक्कम / Maturity Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid black' }}>{new Date(selectedAccount.createdAt).toLocaleDateString('en-GB')}</td>
+                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid black' }}>{selectedAccount.depositAmount.toFixed(2)}</td>
+                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid black' }}>{selectedAccount.tenureMonths}</td>
+                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid black' }}>{selectedAccount.interestRate.toFixed(2)}</td>
+                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid black' }}>{new Date(selectedAccount.maturityDate).toLocaleDateString('en-GB')}</td>
+                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle', border: '1px solid black' }}>{selectedAccount.maturityAmount.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style={{ marginTop: '20px', textAlign: 'center' }}>रक्कम शब्दांत / Amount in Words: {numberToWords(Math.floor(selectedAccount.maturityAmount))}</p>
+          <p style={{ textAlign: 'center' }}>जारी करण्याची तारीख / Date of Issue: {new Date().toLocaleDateString('en-GB')}</p>
+          <div style={{ textAlign: 'right', marginTop: '20px' }}>
+            <p>OJAL MICRO SERVICE FOUNDATION</p>
+            <p>अधिकृत स्वाक्षरी / Authorised Signatory</p>
+          </div>
+          <img src={ojalLogo} alt="Watermark Logo" style={{ position: 'absolute', top: '55%', left: '50%', transform: 'translate(-50%, -50%)', opacity: '0.2', width: '150px', zIndex: '1', pointerEvents: 'none' }} />
+        </div>
+        <div className="flex justify-end gap-2 mt-4 sticky bottom-0 bg-white z-10 py-2">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={handlePrint}
+          >
+            Print
+          </button>
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            onClick={handleDownload}
+          >
+            Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
 
       {/* Toast Container */}
       <ToastContainer
