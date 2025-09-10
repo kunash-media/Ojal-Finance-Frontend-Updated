@@ -126,7 +126,7 @@ const RecurringDeposit = () => {
 
       const accountCheckPromises = branchUsers.map(async (user) => {
         try {
-          const response = await fetch(`http://localhost:8080/api/rds/get-all-rds-by-userId/${user.userId}`);
+          const response = await fetch(`http://localhost:8081/api/rds/get-all-rds-by-userId/${user.userId}`);
           if (response.ok) {
             const rdAccounts = await response.json();
             accountsMap.set(user.userId, {
@@ -323,7 +323,7 @@ const RecurringDeposit = () => {
   // Create RD account
   const handleConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/rds/create-rd/${selectedUser.userId}`;
+      const apiUrl = `http://localhost:8081/api/rds/create-rd/${selectedUser.userId}`;
       const payload = {
         depositAmount: parseFloat(rdFormData.depositAmount),
         interestRate: parseFloat(rdFormData.interestRate),
@@ -393,7 +393,7 @@ const RecurringDeposit = () => {
   // Update RD account
   const handleUpdateConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/rds/patch-rd-by-accNum/${currentRdAccountStatus}`;
+      const apiUrl = `http://localhost:8081/api/rds/patch-rd-by-accNum/${currentRdAccountStatus}`;
       const payload = {
         depositAmount: parseFloat(rdFormData.depositAmount),
         interestRate: parseFloat(rdFormData.interestRate),
@@ -466,7 +466,7 @@ const RecurringDeposit = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/rds/delete-rd-by-accNum/${accountToDelete}`;
+      const apiUrl = `http://localhost:8081/api/rds/delete-rd-by-accNum/${accountToDelete}`;
       console.log('Deleting RD account:', accountToDelete);
       console.log('DELETE API URL:', apiUrl);
 
@@ -528,7 +528,7 @@ const RecurringDeposit = () => {
 
   const handleDeleteAllRDs = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/rds/delete-all-rds-by-userId/${selectedUser.userId}`;
+      const apiUrl = `http://localhost:8081/api/rds/delete-all-rds-by-userId/${selectedUser.userId}`;
       console.log('Deleting all RD accounts for user:', selectedUser.userId);
       console.log('DELETE API URL:', apiUrl);
 
@@ -606,41 +606,12 @@ const RecurringDeposit = () => {
           </button>
         ) : (
           <>
-            {/* {rdCount === 0 ? (
-              <>
-                <button
-                  className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
-                  onClick={() => handleUpdateRD(user, accountInfo.rdAccounts[0])}
-                  title="Update RD"
-                >
-                  <EditNoteIcon fontSize="small" />
-                </button>
-                <button
-                  className="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition-colors"
-                  onClick={() => handleDeleteClick(user, accountInfo.rdAccounts[0])}
-                  title="Delete RD"
-                >
-                  <DeleteOutline fontSize="small" />
-                </button>
-              </>
-            ) : ( */}
-              {/* <> */}
-                {/* <button
-                  className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700 transition-colors"
-                  onClick={() => handleAddRD(user)}
-                  title="Add New RD"
-                >
-                  <EditNoteIcon fontSize="small" />
-                </button> */}
-                <button
-                  className="bg-purple-800 text-white p-2 rounded hover:bg-purple-700 transition-colors"
-                  onClick={() => handleHistoryClick(user)}
-                  title="View RD History"
-                >
-                  View RDs
-                </button>
-              {/* </> */}
-            {/* )} */}
+            <button
+              className="bg-purple-800 text-white p-2 rounded hover:bg-purple-700 transition-colors"
+              onClick={() => handleHistoryClick(user)}
+              title="View RD History">
+              View RDs
+            </button>
           </>
         )}
       </div>
@@ -1038,10 +1009,8 @@ const RecurringDeposit = () => {
           </div>
         </div>
       )}
-
-
+      
  {/*----- Receipt model----------*/}
-
   {isReceiptModalOpen && selectedAccount && (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl overflow-auto h-[550px] relative">
@@ -1126,21 +1095,18 @@ const RecurringDeposit = () => {
       </div>
     </div>
   )}
-
-      {/* Toast Container */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-    </div>
+    <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="light"/>
+  </div>
   );
 };
 

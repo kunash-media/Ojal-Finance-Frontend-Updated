@@ -31,13 +31,13 @@ export const UserProvider = ({ children }) => {
       if (role === 'SUPER_ADMIN') {
         // Call the existing API for SUPER_ADMIN
         response = await axios.get(
-          'http://localhost:8080/api/users/get-all-users',
+          'http://localhost:8081/api/users/get-all-users',
           { params: { role } }
         );
       } else {
         // Call the branch-specific API for other roles
         response = await axios.get(
-          `http://localhost:8080/api/users/get-all-branch?branchName=${authUser?.branchName || ''}`
+          `http://localhost:8081/api/users/get-all-branch?branchName=${authUser?.branchName || ''}`
         );
       }
       

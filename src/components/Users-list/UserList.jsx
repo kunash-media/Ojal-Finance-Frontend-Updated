@@ -31,8 +31,9 @@ const UserList = () => {
     useEffect(() => {
         const fetchBranches = async () => {
             setBranchLoading(true);
+            
             try {
-                const response = await fetch('http://localhost:8080/api/admins/get-branch-list');
+                const response = await fetch('http://localhost:8081/api/admins/get-branch-list');
                 if (response.ok) {
                     const branchData = await response.json();
                     setBranches(branchData);

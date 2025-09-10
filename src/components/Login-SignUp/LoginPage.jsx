@@ -26,7 +26,7 @@ function LoginForm() {
     setError(''); // Clear previous errors
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admins/login?username=${username}&password=${password}`, {
+      const response = await fetch(`http://localhost:8081/api/admins/login?username=${username}&password=${password}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

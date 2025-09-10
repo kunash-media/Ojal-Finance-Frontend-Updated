@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  */
 
 // Base API URL - should be configured from environment variables
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081/api';
 
 /**
  * Create a savings account for a user

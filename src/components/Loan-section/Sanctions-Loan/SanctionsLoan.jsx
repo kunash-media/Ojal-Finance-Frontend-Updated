@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Eye, X, User, Phone, MapPin, Calendar, Building } from 'lucide-react';
-import "./SanctionsLoan.css"; // Use the same CSS with necessary adjustments
+import "./SanctionsLoan.css"; 
 
 const SanctionsLoan = () => {
     // State management
@@ -31,14 +31,14 @@ const SanctionsLoan = () => {
             setLoading(true);
             try {
                 // Fetch branches
-                const branchResponse = await fetch('http://localhost:8080/api/admins/get-branch-list');
+                const branchResponse = await fetch('http://localhost:8081/api/admins/get-branch-list');
                 if (branchResponse.ok) {
                     const branchData = await branchResponse.json();
                     setBranches(branchData);
                 }
 
                 // Fetch loans
-                const loanResponse = await fetch('http://localhost:8080/api/loans/get-all-loans');
+                const loanResponse = await fetch('http://localhost:8081/api/loans/get-all-loans');
 
                 
                 if (loanResponse.ok) {

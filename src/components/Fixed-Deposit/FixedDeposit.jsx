@@ -122,7 +122,7 @@ const FixedDeposit = () => {
 
       const accountCheckPromises = branchUsers.map(async (user) => {
         try {
-          const response = await fetch(`http://localhost:8080/api/fds/get-all-fds-by-userId/${user.userId}`);
+          const response = await fetch(`http://localhost:8081/api/fds/get-all-fds-by-userId/${user.userId}`);
           if (response.ok) {
             const fdAccounts = await response.json();
             accountsMap.set(user.userId, {
@@ -319,7 +319,7 @@ const FixedDeposit = () => {
   // Create FD account
   const handleConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/accounts/${selectedUser.userId}/fd`;
+      const apiUrl = `http://localhost:8081/api/accounts/${selectedUser.userId}/fd`;
       const payload = {
         principalAmount: parseFloat(fdFormData.principalAmount),
         interestRate: parseFloat(fdFormData.interestRate),
@@ -384,7 +384,7 @@ const FixedDeposit = () => {
   // Update FD account
   const handleUpdateConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/fds/patch-fd-by-accNum/${currentFdAccountStatus}`;
+      const apiUrl = `http://localhost:8081/api/fds/patch-fd-by-accNum/${currentFdAccountStatus}`;
       const payload = {
         principalAmount: parseFloat(fdFormData.principalAmount),
         interestRate: parseFloat(fdFormData.interestRate),
@@ -452,7 +452,7 @@ const FixedDeposit = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/fds/delete-fd-by-accNum/${accountToDelete}`;
+      const apiUrl = `http://localhost:8081/api/fds/delete-fd-by-accNum/${accountToDelete}`;
       const response = await fetch(apiUrl, {
         method: 'DELETE',
         headers: {
@@ -506,7 +506,7 @@ const FixedDeposit = () => {
 
   const handleDeleteAllFDs = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/fds/delete-all-fds-by-userId/${selectedUser.userId}`;
+      const apiUrl = `http://localhost:8081/api/fds/delete-all-fds-by-userId/${selectedUser.userId}`;
       const response = await fetch(apiUrl, {
         method: 'DELETE',
         headers: {

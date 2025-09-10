@@ -69,7 +69,7 @@ const DailyCollection = () => {
   // Fetch all accounts
   const fetchAccounts = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/saving/get-all-savings-users', {
+      const response = await fetch('http://localhost:8081/api/saving/get-all-savings-users', {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -88,7 +88,7 @@ const DailyCollection = () => {
   // Fetch transactions for a specific account
   const fetchTransactions = async (accountNumber) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/saving/transactions/get-user-transactions/${accountNumber}`, {
+      const response = await fetch(`http://localhost:8081/api/saving/transactions/get-user-transactions/${accountNumber}`, {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -251,7 +251,7 @@ const DailyCollection = () => {
       };
 
       // Make API call to submit payment
-      const response = await fetch(`http://localhost:8080/api/saving/transactions/create-transaction/${selectedAccount.accountNumber}`, {
+      const response = await fetch(`http://localhost:8081/api/saving/transactions/create-transaction/${selectedAccount.accountNumber}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -294,64 +294,7 @@ const DailyCollection = () => {
       toast.error('Failed to submit payment');
     }
   };
-  // Handle final payment submission
-  // const handleFinalSubmit = async () => {
-  //   try {
-  //     // Prepare payload for API
-  //     const payload = {
-  //       amount: parseFloat(paymentData.amount),
-  //       payMode: paymentData.payMode,
-  //       utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : "NA",
-  //       cash: paymentData.payMode === "CASH" ? paymentData.amount.toString() : "NA",
-  //       chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : "NA",
-  //       note: paymentData.note || "NO",
-  //       accountNumber: selectedAccount.accountNumber
-  //     };
 
-  //     // Make API call to submit payment
-  //     const response = await fetch('http://localhost:8080/api/saving/transactions/add-transaction', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(payload)
-  //     });
-
-  //     if (!response.ok) throw new Error('Failed to submit payment');
-
-  //     // Update local state
-  //     const newTransaction = {
-  //       id: Date.now(), // Ideally, get this from the API response
-  //       amount: parseFloat(paymentData.amount),
-  //       payMode: paymentData.payMode,
-  //       utrNo: paymentData.payMode === "IMPS" ? paymentData.utrNo : null,
-  //       cash: paymentData.payMode === "CASH" ? paymentData.amount.toString() : null,
-  //       chequeNumber: paymentData.payMode === "Cheque" ? paymentData.chequeNumber : null,
-  //       note: paymentData.note || "",
-  //       timestamp: new Date().toISOString()
-  //     };
-
-  //     const updatedAccounts = accounts.map(account => {
-  //       if (account.accountNumber === selectedAccount.accountNumber) {
-  //         return {
-  //           ...account,
-  //           transactions: [...(account.transactions || []), newTransaction],
-  //           balance: account.balance + parseFloat(paymentData.amount)
-  //         };
-  //       }
-  //       return account;
-  //     });
-
-  //     setAccounts(updatedAccounts);
-  //     setFilteredAccounts(updatedAccounts);
-  //     setOpenConfirmModal(false);
-  //     setOpenPayForm(false);
-  //     toast.success('Payment added successfully!');
-  //   } catch (error) {
-  //     console.error('Error submitting payment:', error);
-  //     toast.error('Failed to submit payment');
-  //   }
-  // };
 
   // Helper function to format date and time
   const formatDateTime = (timestamp) => {

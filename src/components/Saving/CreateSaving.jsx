@@ -64,7 +64,7 @@ function CreateSaving() {
       // Check each user for existing savings account
       const accountCheckPromises = branchUsers.map(async (user) => {
         try {
-          const response = await fetch(`http://localhost:8080/api/saving/get-by-userId/${user.userId}`);
+          const response = await fetch(`http://localhost:8081/api/saving/get-by-userId/${user.userId}`);
 
           if (response.ok) {
             const accountData = await response.json();
@@ -302,7 +302,7 @@ function CreateSaving() {
   // Replace your handleConfirm function with this:
   const handleConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8080/api/accounts/${currentUserId}/saving`;
+      const apiUrl = `http://localhost:8081/api/accounts/${currentUserId}/saving`;
 
       // Parse to numbers and validate
       const interestRate = parseFloat(savingData.interestRate);
@@ -400,7 +400,7 @@ function CreateSaving() {
   // Replace your handleUpdateConfirm function with this:
   const handleUpdateConfirm = async () => {
     try {
-      const updateApiUrl = `http://localhost:8080/api/saving/update-by-userId/${currentUserId}`;
+      const updateApiUrl = `http://localhost:8081/api/saving/update-by-userId/${currentUserId}`;
 
       // Parse to numbers and validate
       const interestRate = parseFloat(savingData.interestRate);
@@ -503,7 +503,7 @@ function CreateSaving() {
       }
       else {
         // Fallback to API call if no cached data
-        const getApiUrl = `http://localhost:8080/api/saving/get-by-userId/${userId}`;
+        const getApiUrl = `http://localhost:8081/api/saving/get-by-userId/${userId}`;
 
         console.log('Fetching account data for user:', userId);
         console.log('GET API URL:', getApiUrl);
@@ -570,7 +570,7 @@ function CreateSaving() {
 
     try {
       // UPDATED API URL: Now uses account number instead of user ID
-      const apiUrl = `http://localhost:8080/api/saving/delete-by-accountNumber/${accountToDelete}`;
+      const apiUrl = `http://localhost:8081/api/saving/delete-by-accountNumber/${accountToDelete}`;
 
       console.log('Delete account with account number:', accountToDelete);
       console.log('DELETE API URL:', apiUrl);
