@@ -6,10 +6,11 @@ import { useAuth } from '../../context/AuthContext';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import PaymentIcon from '@mui/icons-material/Payment';
+import HistoryIcon from '@mui/icons-material/History';
 import ojalLogo from '../../assets/ojal-logo.png';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-// import { History } from 'lucide-react';
 import "./RecurringDeposit.css";
 
 // Debounce utility function
@@ -53,6 +54,24 @@ const RecurringDeposit = () => {
 
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
+
+  // New states for pay and transaction history
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
+  const [isTransactionHistoryModalOpen, setIsTransactionHistoryModalOpen] = useState(false);
+  const [payFormData, setPayFormData] = useState({
+    amount: "",
+    payMode: "CASH",
+    utrNo: null,
+    chequeNumber: null,
+    note: ""
+  });
+  const [transactions, setTransactions] = useState([]);
+  const [transactionFilter, setTransactionFilter] = useState({
+    payMode: "ALL",
+    fromDate: "",
+    toDate: ""
+  });
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
 
   // Number to words function
   const numberToWords = (num) => {
@@ -108,8 +127,6 @@ const RecurringDeposit = () => {
   };
 
   // Fetch RD accounts data
-
-
   const fetchRdAccountsData = useCallback(async () => {
     if (!adminBranch || adminBranch === "NA" || !users || users.length === 0) {
       setUserRdAccountsMap(new Map());
@@ -618,6 +635,138 @@ const RecurringDeposit = () => {
     );
   };
 
+  // New handlers for pay and transaction history
+
+  const handlePayClick = (account) => {
+    setSelectedAccount(account);
+    setPayFormData({
+      amount: "",
+      payMode: "CASH",
+      utrNo: null,
+      chequeNumber: null,
+      note: ""
+    });
+    setIsPayModalOpen(true);
+  };
+
+  const handlePayFormChange = (e) => {
+    const { name, value } = e.target;
+    setPayFormData({
+      ...payFormData,
+      [name]: value
+    });
+  };
+
+  const handlePaySubmit = async (e) => {
+    e.preventDefault();
+
+    const { amount, payMode, utrNo, chequeNumber, note } = payFormData;
+    const amountNum = parseFloat(amount);
+
+    if (isNaN(amountNum) || amountNum <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+
+    if (payMode === 'IMPS' && !utrNo) {
+      toast.error('Please enter UTR No. for IMPS');
+      return;
+    }
+
+    if (payMode === 'CHEQUE' && !chequeNumber) {
+      toast.error('Please enter Cheque No. for Cheque');
+      return;
+    }
+
+    const payload = {
+      amount: amountNum,
+      payMode: payMode.toUpperCase(),
+      utrNo: payMode === 'IMPS' ? utrNo : null,
+      cash: payMode === 'CASH' ? amount : null,
+      chequeNumber: payMode === 'CHEQUE' ? chequeNumber : null,
+      note: note || null
+    };
+
+    try {
+      const apiUrl = `http://localhost:8081/api/rd/transactions/rd-deposit/${selectedAccount.accountNumber}`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to create transaction: ${errorText}`);
+      }
+
+      toast.success('Payment successful!');
+      setIsPayModalOpen(false);
+      // Optionally refresh RD data or transactions if needed
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      toast.error('Failed to process payment: ' + error.message);
+    }
+  };
+
+  const handleTransactionHistoryClick = async (account) => {
+    setSelectedAccount(account);
+    setTransactionFilter({
+      payMode: "ALL",
+      fromDate: "",
+      toDate: ""
+    });
+    setIsTransactionHistoryModalOpen(true);
+    await fetchTransactions(account.accountNumber);
+  };
+
+  const fetchTransactions = async (accountNumber) => {
+    try {
+      const apiUrl = `http://localhost:8081/api/rd/transactions/get-rd-transactions/${accountNumber}`;
+      const response = await fetch(apiUrl);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch transactions');
+      }
+
+      const data = await response.json();
+      setTransactions(data.transactionData || []);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      toast.error('Failed to fetch transaction history');
+    }
+  };
+
+  useEffect(() => {
+    let filtered = transactions;
+
+    if (transactionFilter.payMode !== "ALL") {
+      filtered = filtered.filter(tx => tx.payMode === transactionFilter.payMode);
+    }
+
+    if (transactionFilter.fromDate) {
+      const from = new Date(transactionFilter.fromDate);
+      filtered = filtered.filter(tx => new Date(tx.date) >= from);
+    }
+
+    if (transactionFilter.toDate) {
+      const to = new Date(transactionFilter.toDate);
+      filtered = filtered.filter(tx => new Date(tx.date) <= to);
+    }
+
+    setFilteredTransactions(filtered);
+  }, [transactions, transactionFilter]);
+
+  const handleTransactionFilterChange = (e) => {
+    const { name, value } = e.target;
+    setTransactionFilter({
+      ...transactionFilter,
+      [name]: value
+    });
+  };
+
   return (
     <div className="p-6 bg-white rounded-lg border border-gray-300 shadow-sm"
          style={{
@@ -978,7 +1127,7 @@ const RecurringDeposit = () => {
                   <p className="mb-2"><span className="font-semibold">Tenure:</span> {account.tenureMonths} months</p>
                   <p className="mb-2"><span className="font-semibold">Maturity Amount:</span> <span className="bg-purple-800 rounded-lg px-2 text-white border-2 border-purple-300">₹{account.maturityAmount.toFixed(2)}</span> </p>
                   <p className="mb-2"><span className="font-semibold">Maturity Date:</span> {account.maturityDate}</p>
-                  <p className="mb-2"><span className="font-semibold">Status:</span> <span className="bg-green-700 rounded-lg px-2 text-white border-2 border-green-300">{account.status}</span> </p>
+                  <p className="mb-2"><span className="font-semibold">Status:</span> <span className=" rounded-lg px-2 text-green-600 bg-green-100 text-green-700 border border-green-500 ">{account.status}</span> </p>
                   <p className="mb-2"><span className="font-semibold">A/C Open Date:</span> {account.createdAt}</p>
                   <div className="flex justify-end gap-2 mt-2">
                     <button
@@ -1002,6 +1151,20 @@ const RecurringDeposit = () => {
                     >
                       <ReceiptLongIcon fontSize="small" />
                     </button>
+                    <button
+                      className="bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition-colors"
+                      onClick={() => handlePayClick(account)}
+                      title="Pay"
+                    >
+                      <PaymentIcon fontSize="small" />
+                    </button>
+                    <button
+                      className="bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 transition-colors"
+                      onClick={() => handleTransactionHistoryClick(account)}
+                      title="History"
+                    >
+                      <HistoryIcon fontSize="small" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1010,6 +1173,169 @@ const RecurringDeposit = () => {
         </div>
       )}
       
+      {/* Pay Modal */}
+      {isPayModalOpen && selectedAccount && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Make Payment for RD Account {selectedAccount.accountNumber}</h2>
+            <p className="mb-4">
+              <span className="font-semibold">Deposit Amount:</span> ₹{selectedAccount.depositAmount.toFixed(2)}<br />
+              <span className="font-semibold">Interest Rate:</span> {selectedAccount.interestRate.toFixed(2)}%
+            </p>
+            <form onSubmit={handlePaySubmit}>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2" htmlFor="amount">Amount (₹)</label>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                  value={payFormData.amount}
+                  onChange={handlePayFormChange}
+                  required
+                  min="1"
+                  step="0.01"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2" htmlFor="payMode">Payment Mode</label>
+                <select
+                  id="payMode"
+                  name="payMode"
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                  value={payFormData.payMode}
+                  onChange={handlePayFormChange}
+                >
+                  <option value="CASH">Cash</option>
+                  <option value="IMPS">IMPS</option>
+                  <option value="CHEQUE">Cheque</option>
+                </select>
+              </div>
+              {payFormData.payMode === 'IMPS' && (
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2" htmlFor="utrNo">UTR No.</label>
+                  <input
+                    type="text"
+                    id="utrNo"
+                    name="utrNo"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                    value={payFormData.utrNo || ''}
+                    onChange={handlePayFormChange}
+                    required
+                  />
+                </div>
+              )}
+              {payFormData.payMode === 'CHEQUE' && (
+                <div className="mb-4">
+                  <label className="block text-gray-700 mb-2" htmlFor="chequeNumber">Cheque No.</label>
+                  <input
+                    type="text"
+                    id="chequeNumber"
+                    name="chequeNumber"
+                    className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                    value={payFormData.chequeNumber || ''}
+                    onChange={handlePayFormChange}
+                    required
+                  />
+                </div>
+              )}
+              <div className="mb-4">
+                <label className="block text-gray-700 mb-2" htmlFor="note">Note</label>
+                <input
+                  type="text"
+                  id="note"
+                  name="note"
+                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                  value={payFormData.note}
+                  onChange={handlePayFormChange}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                  onClick={() => setIsPayModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700"
+                >
+                  Pay
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Transaction History Modal */}
+      {isTransactionHistoryModalOpen && selectedAccount && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-teal-700">Transaction History for RD Account {selectedAccount.accountNumber}</h2>
+              <button 
+                className="text-2xl text-gray-500 hover:text-gray-700"
+                onClick={() => setIsTransactionHistoryModalOpen(false)}
+              >
+                &times;
+              </button>
+            </div>
+            <div className="mb-4 flex gap-3">
+              <select
+                name="payMode"
+                className="p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                value={transactionFilter.payMode}
+                onChange={handleTransactionFilterChange}
+              >
+                <option value="ALL">All Modes</option>
+                <option value="CASH">Cash</option>
+                <option value="IMPS">IMPS</option>
+                <option value="CHEQUE">Cheque</option>
+              </select>
+              <input
+                type="date"
+                name="fromDate"
+                placeholder="From Date"
+                className="p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                value={transactionFilter.fromDate}
+                onChange={handleTransactionFilterChange}
+              />
+              <input
+                type="date"
+                name="toDate"
+                placeholder="To Date"
+                className="p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
+                value={transactionFilter.toDate}
+                onChange={handleTransactionFilterChange}
+              />
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              {filteredTransactions.length === 0 ? (
+                <p className="text-center text-gray-600 py-4">No transactions found</p>
+              ) : (
+                filteredTransactions.map((tx, index) => (
+                  <div key={index} className="mb-4 p-4 border border-gray-400 rounded-lg bg-gray-50 shadow-sm">
+                    <p className="text-xs text-gray-500 text-right mb-2">{tx.date}</p>
+                    <div className="space-y-4">
+                      <p className="text-sm"><span className="font-semibold text-gray-700">Deposit Amount:</span> <span className="font-bold">₹{tx.amount.toFixed(2)}</span></p>
+                      <p className="text-sm"><span className="font-semibold text-gray-700">Payment Mode:</span> {tx.payMode}</p>
+                      {tx.utrNo && <p className="text-sm"><span className="font-semibold text-gray-700">UTR No:</span> {tx.utrNo}</p>}
+                      {tx.chequeNumber && <p className="text-sm"><span className="font-semibold text-gray-700">Cheque No:</span> {tx.chequeNumber}</p>}
+                      <p className="text-sm"><span className="font-semibold text-gray-700">Note:</span> {tx.note || 'N/A'}</p>
+                      <p className="text-sm "><span className="font-semibold text-gray-700">Status:</span> <span className={`px-2 py-1 rounded-lg text-xs ${tx.status === 'COMPLETED' ? 'bg-green-100 text-green-700 border border-green-500' : 'bg-yellow-100 text-yellow-700'}`}>{tx.status}</span></p>
+                      <p className="text-sm font-bold"><span className="font-semibold text-gray-700">Total Balance:</span> <span className=" text-black border border-teal-600 px-2 py-1 rounded-lg">₹{tx.balanceAfter.toFixed(2)}</span></p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
  {/*----- Receipt model----------*/}
   {isReceiptModalOpen && selectedAccount && (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
