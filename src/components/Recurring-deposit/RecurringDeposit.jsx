@@ -143,7 +143,7 @@ const RecurringDeposit = () => {
 
       const accountCheckPromises = branchUsers.map(async (user) => {
         try {
-          const response = await fetch(`http://localhost:8081/api/rds/get-all-rds-by-userId/${user.userId}`);
+          const response = await fetch(`https://api.ojalmsfoundation.in/api/rds/get-all-rds-by-userId/${user.userId}`);
           if (response.ok) {
             const rdAccounts = await response.json();
             accountsMap.set(user.userId, {
@@ -340,7 +340,7 @@ const RecurringDeposit = () => {
   // Create RD account
   const handleConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8081/api/rds/create-rd/${selectedUser.userId}`;
+      const apiUrl = `https://api.ojalmsfoundation.in/api/rds/create-rd/${selectedUser.userId}`;
       const payload = {
         depositAmount: parseFloat(rdFormData.depositAmount),
         interestRate: parseFloat(rdFormData.interestRate),
@@ -410,7 +410,7 @@ const RecurringDeposit = () => {
   // Update RD account
   const handleUpdateConfirm = async () => {
     try {
-      const apiUrl = `http://localhost:8081/api/rds/patch-rd-by-accNum/${currentRdAccountStatus}`;
+      const apiUrl = `https://api.ojalmsfoundation.in/api/rds/patch-rd-by-accNum/${currentRdAccountStatus}`;
       const payload = {
         depositAmount: parseFloat(rdFormData.depositAmount),
         interestRate: parseFloat(rdFormData.interestRate),
@@ -483,7 +483,7 @@ const RecurringDeposit = () => {
 
   const handleDeleteAccount = async () => {
     try {
-      const apiUrl = `http://localhost:8081/api/rds/delete-rd-by-accNum/${accountToDelete}`;
+      const apiUrl = `https://api.ojalmsfoundation.in/api/rds/delete-rd-by-accNum/${accountToDelete}`;
       console.log('Deleting RD account:', accountToDelete);
       console.log('DELETE API URL:', apiUrl);
 
@@ -545,7 +545,7 @@ const RecurringDeposit = () => {
 
   const handleDeleteAllRDs = async () => {
     try {
-      const apiUrl = `http://localhost:8081/api/rds/delete-all-rds-by-userId/${selectedUser.userId}`;
+      const apiUrl = `https://api.ojalmsfoundation.in/api/rds/delete-all-rds-by-userId/${selectedUser.userId}`;
       console.log('Deleting all RD accounts for user:', selectedUser.userId);
       console.log('DELETE API URL:', apiUrl);
 
@@ -688,7 +688,7 @@ const RecurringDeposit = () => {
     };
 
     try {
-      const apiUrl = `http://localhost:8081/api/rd/transactions/rd-deposit/${selectedAccount.accountNumber}`;
+      const apiUrl = `https://api.ojalmsfoundation.in/api/rd/transactions/rd-deposit/${selectedAccount.accountNumber}`;
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -724,7 +724,7 @@ const RecurringDeposit = () => {
 
   const fetchTransactions = async (accountNumber) => {
     try {
-      const apiUrl = `http://localhost:8081/api/rd/transactions/get-rd-transactions/${accountNumber}`;
+      const apiUrl = `https://api.ojalmsfoundation.in/api/rd/transactions/get-rd-transactions/${accountNumber}`;
       const response = await fetch(apiUrl);
 
       if (!response.ok) {

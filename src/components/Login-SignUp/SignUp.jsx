@@ -116,7 +116,7 @@ function SignUp() {
                 password: formData.password
             };
 
-            const response = await fetch('http://localhost:8081/api/admins/register', {
+            const response = await fetch('https://api.ojalmsfoundation.in/api/admins/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),

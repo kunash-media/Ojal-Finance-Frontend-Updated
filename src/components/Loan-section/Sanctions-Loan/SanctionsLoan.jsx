@@ -31,14 +31,14 @@ const SanctionsLoan = () => {
             setLoading(true);
             try {
                 // Fetch branches
-                const branchResponse = await fetch('http://localhost:8081/api/admins/get-branch-list');
+                const branchResponse = await fetch('https://api.ojalmsfoundation.in/api/admins/get-branch-list');
                 if (branchResponse.ok) {
                     const branchData = await branchResponse.json();
                     setBranches(branchData);
                 }
 
                 // Fetch loans
-                const loanResponse = await fetch('http://localhost:8081/api/loans/get-all-loans');
+                const loanResponse = await fetch('https://api.ojalmsfoundation.in/api/loans/get-all-loans');
 
                 
                 if (loanResponse.ok) {

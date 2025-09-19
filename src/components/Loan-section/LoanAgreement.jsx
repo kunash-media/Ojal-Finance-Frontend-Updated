@@ -1445,7 +1445,7 @@ const LoanApplicationForm = () => {
     }
 
     // Submit to backend (use your actual URL)
-    const response = await fetch('http://localhost:8081/api/loans/create-loan', {
+    const response = await fetch('https://api.ojalmsfoundation.in/api/loans/create-loan', {
       method: 'POST',
       body: formDataToSend,
     });

@@ -50,7 +50,7 @@ const AddCustomerForm = () => {
     const fetchBranchList = async () => {
         setBranchLoading(true);
         try {
-            const response = await fetch('http://localhost:8081/api/admins/get-branch-list', {
+            const response = await fetch('https://api.ojalmsfoundation.in/api/admins/get-branch-list', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -173,7 +173,7 @@ const AddCustomerForm = () => {
             }
 
             // Make API call to backend
-            const response = await fetch('http://localhost:8081/api/users/register', {
+            const response = await fetch('https://api.ojalmsfoundation.in/api/users/register', {
                 method: 'POST',
                 body: formDataToSend,
                 headers: {

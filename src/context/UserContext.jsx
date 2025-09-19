@@ -22,7 +22,7 @@ export const UserProvider = ({ children }) => {
    * Fetches users from backend based on role from authenticated user
    * @param {string} role - The role to filter users by
    */
-  const fetchUsers = async (role) => {
+  const fetchUsers = async (role)  => {
     setLoading(true);
     setError(null);
     try {
@@ -31,13 +31,13 @@ export const UserProvider = ({ children }) => {
       if (role === 'SUPER_ADMIN') {
         // Call the existing API for SUPER_ADMIN
         response = await axios.get(
-          'http://localhost:8081/api/users/get-all-users',
+          'https://api.ojalmsfoundation.in/api/users/get-all-users',
           { params: { role } }
         );
       } else {
         // Call the branch-specific API for other roles
         response = await axios.get(
-          `http://localhost:8081/api/users/get-all-branch?branchName=${authUser?.branchName || ''}`
+          `https://api.ojalmsfoundation.in/api/users/get-all-branch?branchName=${authUser?.branchName || ''}`
         );
       }
       

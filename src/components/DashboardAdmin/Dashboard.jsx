@@ -1,17 +1,101 @@
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ChartCard from './ChartCard';
 import StatCards from './StatCards';
 import CustomersTable from './CustomersTable';
-import { lineChartData, barChartData, pieChartData, PIECHART_COLORS,doughnutData, DOUGHNUT_COLORS} from '../../data/dummyData';
 import { colors } from '../../utils/colors';
+import { useAuth } from '../../context/AuthContext';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 function Dashboard() {
+  const { user } = useAuth();
+  const [statsData, setStatsData] = useState([]);
+  const [lineChartData, setLineChartData] = useState([]);
+  const [pieChartData, setPieChartData] = useState([]);
+  const [loanTrendsData, setLoanTrendsData] = useState([]);
+  const [loanTypesData, setLoanTypesData] = useState([]);
+  const [customersData, setCustomersData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Colors for charts
+  const PIECHART_COLORS = [colors.airForceBlue, colors.caramel, colors.amaranth];
+  // Explicitly define DOUGHNUT_COLORS to ensure colors are applied
+  const DOUGHNUT_COLORS = [
+    '#2ECC71', // emerald
+    '#00CED1', // cyan
+    '#FF9933', // vividTangerine
+    '#32CD32'  // lime
+  ];
+
+  // Fetch dashboard data
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user?.branchName) return;
+      setLoading(true);
+      try {
+        // Fetch stats
+        const statsResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/stats', {
+          params: { branchName: user.branchName }
+        });
+        const stats = [
+          { title: 'Total Customers', value: statsResponse.data.totalUsers, icon: 'Users', color: colors.airForceBlue },
+          { title: 'Total Savings Balance', value: `₹${statsResponse.data.totalSavings.toLocaleString()}`, icon: 'HandCoins', color: colors.caramel },
+          { title: 'Total FD Balance', value: `₹${statsResponse.data.totalFd.toLocaleString()}`, icon: 'Building', color: colors.amaranth },
+          { title: 'Total RD Balance', value: `₹${statsResponse.data.totalRd.toLocaleString()}`, icon: 'ChartLine', color: colors.emerald },
+          { title: 'Total Loan Disbursed', value: `₹${statsResponse.data.totalLoans.toLocaleString()}`, icon: 'FileText', color: colors.vividTangerine }
+        ];
+        setStatsData(stats);
+
+        // Fetch account trends (LineChart)
+        const trendsResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/account-trends', {
+          params: { branchName: user.branchName }
+        });
+        setLineChartData(trendsResponse.data);
+
+        // Fetch loan trends (BarChart)
+        const loanTrendsResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/loan-trends', {
+          params: { branchName: user.branchName }
+        });
+        setLoanTrendsData(loanTrendsResponse.data);
+
+        // Fetch loan types (DoughnutChart)
+        const loanTypesResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/loan-types', {
+          params: { branchName: user.branchName }
+        });
+        setLoanTypesData(loanTypesResponse.data);
+
+        // Fetch account distribution (PieChart)
+        const distributionResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/account-distribution', {
+          params: { branchName: user.branchName }
+        });
+        setPieChartData(distributionResponse.data);
+
+        // Fetch recent customers
+        const customersResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/recent-customers', {
+          params: { branchName: user.branchName }
+        });
+        setCustomersData(customersResponse.data);
+      } catch (err) {
+        setError('Failed to fetch dashboard data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [user?.branchName]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-800 ">Dashboard</h1>
       
       {/* Stat Cards */}
-      <StatCards />
+      <StatCards statCardsData={statsData} />
       
       {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -38,7 +122,7 @@ function Dashboard() {
         <ChartCard title="Loan Activity" description="Monthly loan disbursements and repayments">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart 
-              data={barChartData}
+              data={loanTrendsData}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
@@ -80,17 +164,16 @@ function Dashboard() {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={doughnutData}
+                data={loanTypesData}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
                 outerRadius={80}
-                fill="#8884d8"
                 paddingAngle={5}
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
               >
-                {doughnutData.map((entry, index) => (
+                {loanTypesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={DOUGHNUT_COLORS[index % DOUGHNUT_COLORS.length]} />
                 ))}
               </Pie>
@@ -101,8 +184,10 @@ function Dashboard() {
       </div>
 
       {/* Customers Table */}
-      <CustomersTable />
-      <div class="border-t border-gray-300 text-center py-4 text-sm text-gray-600">© {new Date().getFullYear()} Ojal Finance. All Rights Reserved | Developed by Kunash Media Solutions.</div>
+      <CustomersTable customersData={customersData} />
+      <div className="border-t border-gray-300 text-center py-4 text-sm text-gray-600">
+        © {new Date().getFullYear()} Ojal Finance. All Rights Reserved | Developed by Kunash Media Solutions.
+      </div>
     </div>
   );
 }

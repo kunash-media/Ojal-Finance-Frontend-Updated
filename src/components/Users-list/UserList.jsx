@@ -33,7 +33,7 @@ const UserList = () => {
             setBranchLoading(true);
             
             try {
-                const response = await fetch('http://localhost:8081/api/admins/get-branch-list');
+                const response = await fetch('https://api.ojalmsfoundation.in/api/admins/get-branch-list');
                 if (response.ok) {
                     const branchData = await response.json();
                     setBranches(branchData);

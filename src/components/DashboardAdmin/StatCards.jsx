@@ -1,13 +1,13 @@
-import { Users, HandCoins, Building, FileText } from 'lucide-react';
-import { statCardsData } from '../../data/dummyData';
+import { Users, HandCoins, Building, FileText,ChartLine } from 'lucide-react';
 
-function StatCards() {
+function StatCards({ statCardsData }) {
   // Map icon name to component
   const iconMap = {
     Users: <Users size={24} />,
     HandCoins: <HandCoins size={24} />,
     Building: <Building size={24} />,
-    FileText: <FileText size={24} />
+    FileText: <FileText size={24} />,
+    ChartLine : <ChartLine size={24}/>
   };
 
   return (

@@ -69,7 +69,7 @@ const DailyCollection = () => {
   // Fetch all accounts
   const fetchAccounts = async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/saving/get-all-savings-users', {
+      const response = await fetch('https://api.ojalmsfoundation.in/api/saving/get-all-savings-users', {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -88,7 +88,7 @@ const DailyCollection = () => {
   // Fetch transactions for a specific account
   const fetchTransactions = async (accountNumber) => {
     try {
-      const response = await fetch(`http://localhost:8081/api/saving/transactions/get-user-transactions/${accountNumber}`, {
+      const response = await fetch(`https://api.ojalmsfoundation.in/api/saving/transactions/get-user-transactions/${accountNumber}`, {
         headers: {
           'Content-Type': 'application/json',
         }
@@ -251,7 +251,7 @@ const DailyCollection = () => {
       };
 
       // Make API call to submit payment
-      const response = await fetch(`http://localhost:8081/api/saving/transactions/create-transaction/${selectedAccount.accountNumber}`, {
+      const response = await fetch(`https://api.ojalmsfoundation.in/api/saving/transactions/create-transaction/${selectedAccount.accountNumber}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
