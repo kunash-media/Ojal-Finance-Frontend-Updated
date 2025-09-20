@@ -29,7 +29,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
     { name: 'Apply for Loan', icon: <FileText size={20} />, path: '/admin-dashboard/apply-loan' },
     { name: 'Loan Sanctions', icon: <PanelRightIcon size={20} />, path: '/admin-dashboard/sanctions-loan-list' },
     { name: 'All Customers', icon: <FileUser size={20} />, path: '/admin-dashboard/all-customers' },
-    { name: 'Reports', icon: <BarChart size={20} />, path: '/admin-dashboard/reports' },
+    // { name: 'Reports', icon: <BarChart size={20} />, path: '/admin-dashboard/reports' },
   ];
   
   // Handlers for logout confirmation

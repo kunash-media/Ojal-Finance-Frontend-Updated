@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useUsers } from '../../context/UserContext';
 import { Search, Filter, Eye, X, User, Phone, Mail, MapPin, Calendar, Building } from 'lucide-react';
 import "./UserList.css";
+import * as XLSX from 'xlsx';
 
 const UserList = () => {
     // Context data
@@ -14,6 +15,8 @@ const UserList = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [showProfile, setShowProfile] = useState(false);
     const [branchLoading, setBranchLoading] = useState(false);
+    const [showExportConfirmation, setShowExportConfirmation] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
 
     // Debounced search query
     const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -31,7 +34,6 @@ const UserList = () => {
     useEffect(() => {
         const fetchBranches = async () => {
             setBranchLoading(true);
-            
             try {
                 const response = await fetch('https://api.ojalmsfoundation.in/api/admins/get-branch-list');
                 if (response.ok) {
@@ -53,13 +55,11 @@ const UserList = () => {
         if (!users) return [];
 
         return users.filter(user => {
-            // Search filter (name or mobile)
             const searchMatch = !debouncedQuery ||
                 `${user.firstName} ${user.middleName} ${user.lastName}`.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
                 user.mobile.includes(debouncedQuery) ||
                 user.altMobile.includes(debouncedQuery);
 
-            // Branch filter
             const branchMatch = !selectedBranch || user.branch === selectedBranch;
 
             return searchMatch && branchMatch;
@@ -87,6 +87,44 @@ const UserList = () => {
         });
     };
 
+    // Handle export confirmation
+    const handleExportConfirm = () => {
+        console.log('Export confirmed, starting Excel generation');
+        setExportLoading(true);
+        try {
+            const worksheetData = filteredUsers.map(user => ({
+                'User ID': user.userId,
+                'Full Name': `${user.firstName} ${user.middleName !== 'NA' ? user.middleName + ' ' : ''}${user.lastName}`,
+                'Gender': user.gender,
+                'Date of Birth': formatDate(user.dob),
+                'Role': user.role.replace('ROLE_', ''),
+                'Created At': user.createdAt,
+                'Email': user.email,
+                'Primary Mobile': user.mobile,
+                'Alternative Mobile': user.altMobile,
+                'Address': user.address,
+                'Pincode': user.pincode,
+                'Branch': user.branch,
+                'Pan Card': user.documentStatus.panCard ? 'Verified' : 'Pending',
+                'Aadhar Card': user.documentStatus.aadharCard ? 'Verified' : 'Pending',
+                'Passport': user.documentStatus.passPortImg ? 'Verified' : 'Pending',
+                'Voter ID': user.documentStatus.voterIdImg ? 'Verified' : 'Pending',
+                'User Signature': user.documentStatus.userSignatureImg ? 'Verified' : 'Pending'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+            XLSX.writeFile(workbook, 'users_details.xlsx');
+            console.log('Excel file generated and downloaded');
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+        } finally {
+            setExportLoading(false);
+            setShowExportConfirmation(false);
+        }
+    };
+
     // Loading state
     if (loading) {
         return (
@@ -111,6 +149,7 @@ const UserList = () => {
             </div>
         );
     }
+
     return (
         <div className="user-list-container border border-gray-200 rounded-md" style={{
             background: 'linear-gradient(140deg, #ffffff 0%, #E1F7F5 35%, #ffffff 130%)',
@@ -119,7 +158,12 @@ const UserList = () => {
             <div className="bg-white rounded-lg shadow-sm p-3 mb-4 border border-gray-300">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <h1 className="text-xl font-bold text-gray-800">All Customers ({users?.length})</h1>
-
+                    <button 
+                        onClick={() => setShowExportConfirmation(true)}
+                        className="px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-500 text-sm font-medium"
+                    >
+                        Export Records
+                    </button>
                     {/* Search and Filter Controls */}
                     <div className="flex flex-col sm:flex-row gap-4 lg:w-auto w-full search-filter-container">
                         {/* Search Input */}
@@ -309,15 +353,16 @@ const UserList = () => {
                                                 <p className="mt-1 text-sm text-gray-900">{selectedUser.createdAt}</p>
                                             </div>
                                         </div>
-
                                     </div>
+                                    <div>
                                         <h3 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">User Accounts</h3>
-                                         <div className="space-y-4">
+                                        <div className="space-y-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-600">User ID</label>
                                                 <p className="mt-1 text-sm text-gray-900 font-mono">{selectedUser.userId}</p>
                                             </div>
                                         </div>
+                                    </div>
                                 </div>
 
                                 {/* Right Column - Contact & Location */}
@@ -412,6 +457,51 @@ const UserList = () => {
                                 Close
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Export Confirmation Overlay */}
+            {showExportConfirmation && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg w-full max-w-md">
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h2 className="text-lg font-semibold text-gray-800">Export Users</h2>
+                            <button
+                                onClick={() => setShowExportConfirmation(false)}
+                                className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            {exportLoading ? (
+                                <div className="flex justify-center items-center">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                                    <span className="ml-2 text-gray-600">Exporting...</span>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-600">
+                                    Are you sure you want to export {filteredUsers.length} user records to an Excel file?
+                                </p>
+                            )}
+                        </div>
+                        {!exportLoading && (
+                            <div className="p-4 border-t flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowExportConfirmation(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                >
+                                    No
+                                </button>
+                                <button
+                                    onClick={handleExportConfirm}
+                                    className="px-4 py-2 bg-purple-800 text-white rounded-md text-sm font-medium hover:bg-purple-500"
+                                >
+                                    Yes
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

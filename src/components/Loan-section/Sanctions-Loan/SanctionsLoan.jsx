@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Search, Filter, Eye, X, User, Phone, MapPin, Calendar, Building } from 'lucide-react';
 import "./SanctionsLoan.css"; 
+import * as XLSX from 'xlsx';
 
 const SanctionsLoan = () => {
     // State management
@@ -15,7 +16,8 @@ const SanctionsLoan = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [debouncedQuery, setDebouncedQuery] = useState('');
-    // const [documentError, setDocumentError] = useState(null);
+    const [showExportConfirmation, setShowExportConfirmation] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
 
     // Debounce search input
     useEffect(() => {
@@ -39,8 +41,6 @@ const SanctionsLoan = () => {
 
                 // Fetch loans
                 const loanResponse = await fetch('https://api.ojalmsfoundation.in/api/loans/get-all-loans');
-
-                
                 if (loanResponse.ok) {
                     const loanData = await loanResponse.json();
                     setLoans(loanData);
@@ -98,6 +98,52 @@ const SanctionsLoan = () => {
         });
     };
 
+    // Handle export confirmation
+    const handleExportConfirm = () => {
+        console.log('Export confirmed, starting Excel generation');
+        setExportLoading(true);
+        try {
+            const worksheetData = filteredLoans.map(loan => ({
+                'Application No': loan.applicationNo,
+                'Purpose of Loan': loan.purposeOfLoan,
+                'Loan Scheme': loan.loanScheme || 'N/A',
+                'Loan Amount': `₹${loan.loanAmount.toLocaleString('en-IN')}`,
+                'ROI': `${loan.roi}%`,
+                'Applied Date': formatDate(loan.appliedDate),
+                'Tenure': `${loan.tenure} months`,
+                'EMI Amount': `₹${loan.emiAmount.toLocaleString('en-IN')}`,
+                'Processing Fee': `₹${loan.processingFee.toLocaleString('en-IN')}`,
+                'Disbursed Amount': `₹${loan.disbursedAmount.toLocaleString('en-IN')}`,
+                'Member Name': loan.memberName,
+                'Father\'s Name': loan.fatherName,
+                'Mobile': loan.mobile,
+                'Date of Joining': formatDate(loan.dateOfJoining),
+                'Member Type': loan.memberType,
+                'Branch': loan.branchName,
+                'Address': loan.address,
+                'PAN Number': loan.panNumber,
+                'Aadhaar Number': loan.adhaarNumber,
+                'Guarantor Name': loan.grantorName,
+                'Guarantor Address': loan.grantorAddress,
+                'Guarantor Mobile': loan.grantorMobile,
+                'Nominee Name': loan.nomineeName,
+                'Nominee Address': loan.nomineeAddress,
+                'Nominee Mobile': loan.nomineeMobile
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Loans");
+            XLSX.writeFile(workbook, 'loans_details.xlsx');
+            console.log('Excel file generated and downloaded');
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+        } finally {
+            setExportLoading(false);
+            setShowExportConfirmation(false);
+        }
+    };
+
     // Loading state
     if (loading) {
         return (
@@ -131,7 +177,12 @@ const SanctionsLoan = () => {
             <div className="bg-white rounded-lg shadow-sm p-3 mb-4 border border-gray-300">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <h1 className="text-xl font-bold text-gray-800">All Sanctioned Loans ({loans?.length})</h1>
-
+                    <button 
+                        onClick={() => setShowExportConfirmation(true)}
+                        className="px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-900 text-sm font-medium"
+                    >
+                        Export Records
+                    </button>
                     {/* Search and Filter Controls */}
                     <div className="flex flex-col sm:flex-row gap-4 lg:w-auto w-full search-filter-container">
                         <div className="relative flex-1 sm:flex-none sm:w-80">
@@ -441,8 +492,6 @@ const SanctionsLoan = () => {
                                             </div>
                                         </div>
                                     </div>
-
-                                    
                                 </div>
                             </div>
                         </div>
@@ -482,6 +531,51 @@ const SanctionsLoan = () => {
                                 <p className="text-gray-500 text-center">No document found</p>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Export Confirmation Overlay */}
+            {showExportConfirmation && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg w-full max-w-md">
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h2 className="text-lg font-semibold text-gray-800">Export Loans</h2>
+                            <button
+                                onClick={() => setShowExportConfirmation(false)}
+                                className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-4">
+                            {exportLoading ? (
+                                <div className="flex justify-center items-center">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                    <span className="ml-2 text-gray-600">Exporting...</span>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-gray-600">
+                                    Are you sure you want to export {filteredLoans.length} loan records to an Excel file?
+                                </p>
+                            )}
+                        </div>
+                        {!exportLoading && (
+                            <div className="p-4 border-t flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowExportConfirmation(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                                >
+                                    No
+                                </button>
+                                <button
+                                    onClick={handleExportConfirm}
+                                    className="px-4 py-2 bg-purple-800 text-white rounded-md text-sm font-medium hover:bg-purple-900"
+                                >
+                                    Yes
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
