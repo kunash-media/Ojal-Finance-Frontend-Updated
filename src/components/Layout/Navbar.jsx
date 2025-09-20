@@ -9,11 +9,11 @@ function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const navItems = [
-    { name: 'Dashboard', id: 'dashboard', path: '/' },
-    { name: 'Daily collection', id: 'savings', path: '/daily-collection' },
-    { name: 'Recurring Deposit', id: 'rd', path: '/create-rd' },
-    { name: 'Fixed Deposit', id: 'fd', path: '/create-fd' },
-    { name: 'Loan', id: 'loan', path: '/apply-loan' },
+    { name: 'Dashboard', id: 'dashboard', path: '/admin-dashboard' },
+    { name: 'Daily collection', id: 'savings', path: '/admin-dashboard/daily-collection' },
+    { name: 'Recurring Deposit', id: 'rd', path: '/admin-dashboard/create-rd' },
+    { name: 'Fixed Deposit', id: 'fd', path: '/admin-dashboard/create-fd' },
+    { name: 'Loan', id: 'loan', path: '/admin-dashboard/apply-loan' },
   ];
   
   const getInitials = (name) => {

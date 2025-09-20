@@ -1,7 +1,6 @@
 import { useAuth } from './AuthContext';
 import { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
-// import { data } from 'react-router-dom';
 
 // Create the User Context
 export const UserContext = createContext();
@@ -22,14 +21,14 @@ export const UserProvider = ({ children }) => {
    * Fetches users from backend based on role from authenticated user
    * @param {string} role - The role to filter users by
    */
-  const fetchUsers = async (role)  => {
+  const fetchUsers = async (role) => {
     setLoading(true);
     setError(null);
     try {
       let response;
       
       if (role === 'SUPER_ADMIN') {
-        // Call the existing API for SUPER_ADMIN
+        // Call the API for SUPER_ADMIN
         response = await axios.get(
           'https://api.ojalmsfoundation.in/api/users/get-all-users',
           { params: { role } }

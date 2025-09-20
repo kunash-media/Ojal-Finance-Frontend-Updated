@@ -1,16 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Button } from "./style/button";
 import { Input } from "./style/input";
 import { Card, CardContent } from "./style/card";
 import { TypeAnimation } from 'react-type-animation';
-
 import { Toaster, toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 
 function LoginForm() {
-
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -37,11 +35,9 @@ function LoginForm() {
       const data = await response.json();
 
       if (response.ok) {
-
         login(data); // Pass the user data to the context
-
         toast.success('Successfully Logged In!');
-        setTimeout(() => navigate('/'), 1500);
+        setTimeout(() => navigate('/admin-dashboard'), 1500);
         console.log("backend response :", data);
       } else {
         setError(data.message || 'Invalid username or password'); // Set error inline
@@ -65,6 +61,17 @@ function LoginForm() {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
     if (error) setError('');
+  };
+
+  const handleSignupClick = (e) => {
+    e.preventDefault(); // Prevent any default behavior
+    console.log('Signup button clicked, navigating to /signup');
+    try {
+      navigate('/signup', { replace: true });
+      console.log('Navigation to /signup attempted');
+    } catch (err) {
+      console.error('Navigation error:', err);
+    }
   };
 
   return (
@@ -147,7 +154,7 @@ function LoginForm() {
                   tabIndex={-1}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {/*{showPassword ? <EyeOff size={20} /> : <Eye size={20} />} */}
                 </button>
                 {/* Inline error message */}
                 {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
@@ -155,22 +162,22 @@ function LoginForm() {
               <div className="w-full lg:w-10/12 md:w-9/12 mx-auto">
                 <Button
                   type="submit"
-                  className="w-full  text-white  transition-colors duration-300"
+                  className="w-full text-white transition-colors duration-300"
                   disabled={loading}
                 >
                   {loading ? 'Logging in...' : 'Login'}
                 </Button>
               </div>
             </form>
-            <div className="text-center text-md ">
+            <div className="text-center text-md">
               Don't have an account?{' '}
-              <button
-                type="button"
+              <Link
+                to="/signup"
                 className="text-teal-600 hover:underline"
-                onClick={() => navigate('/SignUp')}
+                onClick={handleSignupClick}
               >
                 Sign up
-              </button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -178,4 +185,5 @@ function LoginForm() {
     </div>
   );
 }
+
 export default LoginForm;

@@ -130,7 +130,7 @@ function SignUp() {
             }
 
             toast.success('Account created successfully!');
-            setTimeout(() => navigate('/login'), 4000);
+            setTimeout(() => navigate('/'), 4000);
         } catch (error) {
             console.error('Signup error:', error);
             toast.error('Failed to connect to server.');
@@ -280,7 +280,7 @@ function SignUp() {
                             className="absolute right-3 top-10 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-[#219C90]"
                             onClick={() => setShowPassword(!showPassword)}
                         >
-                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            {/* {showPassword ? <EyeOff size={18} /> : <Eye size={18} />} */}
                         </span>
                         {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
                     </div>
@@ -302,7 +302,7 @@ function SignUp() {
                             className="absolute right-3 top-10 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-[#219C90]"
                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         >
-                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            {/* {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />} */}
                         </span>
                         {errors.confirmPassword && (
                             <p className="text-sm text-red-500 mt-1">{errors.confirmPassword}</p>

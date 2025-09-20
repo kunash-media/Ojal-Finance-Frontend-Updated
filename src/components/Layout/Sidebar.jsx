@@ -5,12 +5,15 @@ import {
   User,
   PanelRightIcon
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 function Sidebar({ isOpen, toggleSidebar }) {
   // Get current location to highlight active route
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   
   // State for logout confirmation modal
   const [logoutConfirmation, setLogoutConfirmation] = useState({
@@ -18,15 +21,15 @@ function Sidebar({ isOpen, toggleSidebar }) {
   });
 
   const mainNavItems = [
-    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/' },
-    { name: 'Add Customer', icon: <Users size={20} />, path: '/add-customer' },
-    { name: 'Create Saving', icon: <HandCoins size={20} />, path: '/create-saving' },
-    { name: 'Create RD', icon: <CreditCard size={20} />, path: '/create-rd' },
-    { name: 'Create FD', icon: <Building size={20} />, path: '/create-fd' },
-    { name: 'Apply for Loan', icon: <FileText size={20} />, path: '/apply-loan' },
-    { name: 'Loan Sanctions', icon: <PanelRightIcon size={20} />, path: '/sanctions-loan-list' },
-    { name: 'All Customers', icon: <FileUser size={20} />, path: '/all-customers' },
-    { name: 'Reports', icon: <BarChart size={20} />, path: '/reports' },
+    { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin-dashboard' },
+    { name: 'Add Customer', icon: <Users size={20} />, path: '/admin-dashboard/add-customer' },
+    { name: 'Create Saving', icon: <HandCoins size={20} />, path: '/admin-dashboard/create-saving' },
+    { name: 'Create RD', icon: <CreditCard size={20} />, path: '/admin-dashboard/create-rd' },
+    { name: 'Create FD', icon: <Building size={20} />, path: '/admin-dashboard/create-fd' },
+    { name: 'Apply for Loan', icon: <FileText size={20} />, path: '/admin-dashboard/apply-loan' },
+    { name: 'Loan Sanctions', icon: <PanelRightIcon size={20} />, path: '/admin-dashboard/sanctions-loan-list' },
+    { name: 'All Customers', icon: <FileUser size={20} />, path: '/admin-dashboard/all-customers' },
+    { name: 'Reports', icon: <BarChart size={20} />, path: '/admin-dashboard/reports' },
   ];
   
   // Handlers for logout confirmation
@@ -36,6 +39,12 @@ function Sidebar({ isOpen, toggleSidebar }) {
   
   const handleCancelLogout = () => {
     setLogoutConfirmation({ isOpen: false });
+  };
+
+  const handleConfirmLogout = () => {
+    logout(); // Clear auth state and localStorage
+    setLogoutConfirmation({ isOpen: false });
+    navigate('/login', { replace: true }); // Navigate to login
   };
 
   return (
@@ -113,12 +122,12 @@ function Sidebar({ isOpen, toggleSidebar }) {
               >
                 Cancel
               </button>
-              <Link to="/login">
-                <button
-                  className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 bounce-effect">
-                  Yes
-                </button>
-              </Link>
+              <button
+                onClick={handleConfirmLogout}
+                className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 bounce-effect"
+              >
+                Yes
+              </button>
             </div>
           </div>
         </div>

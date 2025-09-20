@@ -1,4 +1,4 @@
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { UserProvider } from "./context/UserContext.jsx";
 import FinanceAdminLayout from "./components/FinanceAdminPanel";
@@ -14,6 +14,7 @@ import FixedDeposit from "./components/Fixed-Deposit/FixedDeposit.jsx";
 import UserList from "./components/Users-list/UserList.jsx";
 import LoanApplicationForm from "./components/Loan-section/LoanAgreement.jsx";
 import SanctionsLoan from "./components/Loan-section/Sanctions-Loan/SanctionsLoan.jsx";
+import ProtectedRoute from "./context/ProtectedRoute.jsx";
 
 function App() {
   return (
@@ -21,24 +22,24 @@ function App() {
       <AuthProvider>
         <UserProvider>
           <Routes>
-            <Route path="/" element={<FinanceAdminLayout />}>
-              {/*----Nested routes that will render inside the FinanceAdminLayout ----*/}
-                <Route index element={<Dashboard />} />
-                <Route path = "add-customer" element={<AddCustomerForm/>} />
-                <Route path = "create-saving" element={<CreateSaving />} />
-                <Route path = "create-rd" element={<RecurringDeposit/>} />
-                <Route path = "create-fd" element={<FixedDeposit />} />
-                <Route path = "apply-loan" element={<LoanApplicationForm/>} />
-                <Route path = "sanctions-loan-list" element={<SanctionsLoan/>}/>
-                <Route path = "reports" element={<PagePlaceholder title="Reports"/>} />
-                <Route path = "daily-collection" element={<DailyCollection/>}/>
-                <Route path = "all-customers" element={<UserList/>}/>
+            <Route path="/admin-dashboard" element={<ProtectedRoute><FinanceAdminLayout /></ProtectedRoute>}>
+              <Route index element={<Dashboard />} />
+              <Route path="add-customer" element={<AddCustomerForm />} />
+              <Route path="create-saving" element={<CreateSaving />} />
+              <Route path="create-rd" element={<RecurringDeposit />} />
+              <Route path="create-fd" element={<FixedDeposit />} />
+              <Route path="apply-loan" element={<LoanApplicationForm />} />
+              <Route path="sanctions-loan-list" element={<SanctionsLoan />} />
+              <Route path="reports" element={<PagePlaceholder title="Reports" />} />
+              <Route path="daily-collection" element={<DailyCollection />} />
+              <Route path="all-customers" element={<UserList />} />
             </Route>
-            <Route path = "/login" element={<LoginForm/>}/>
-            <Route path = "/signup" element={<SignUp/>}/>
-          </Routes> 
+            <Route path="/" element={<LoginForm />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </UserProvider>
-      </AuthProvider>     
+      </AuthProvider>
     </Router>
   );
 }
