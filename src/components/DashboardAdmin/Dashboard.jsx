@@ -4,11 +4,13 @@ import StatCards from './StatCards';
 import CustomersTable from './CustomersTable';
 import { colors } from '../../utils/colors';
 import { useAuth } from '../../context/AuthContext';
+import { useUsers } from '../../context/UserContext';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function Dashboard() {
   const { user } = useAuth();
+  const { users } = useUsers();
   const [statsData, setStatsData] = useState([]);
   const [lineChartData, setLineChartData] = useState([]);
   const [pieChartData, setPieChartData] = useState([]);
@@ -20,7 +22,6 @@ function Dashboard() {
 
   // Colors for charts
   const PIECHART_COLORS = [colors.airForceBlue, colors.caramel, colors.amaranth];
-  // Explicitly define DOUGHNUT_COLORS to ensure colors are applied
   const DOUGHNUT_COLORS = [
     '#2ECC71', // emerald
     '#00CED1', // cyan
@@ -31,51 +32,76 @@ function Dashboard() {
   // Fetch dashboard data
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user?.branchName) return;
+      if (!user?.branchName && user?.role !== 'SUPER_ADMIN') return;
       setLoading(true);
       try {
-        // Fetch stats
+        // Fetch stats for all roles (including SUPER_ADMIN)
         const statsResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/stats', {
-          params: { branchName: user.branchName }
+          params: { branchName: user.branchName, role: user.role }
         });
-        const stats = [
-          { title: 'Total Customers', value: statsResponse.data.totalUsers, icon: 'Users', color: colors.airForceBlue },
-          { title: 'Total Savings Balance', value: `₹${statsResponse.data.totalSavings.toLocaleString()}`, icon: 'HandCoins', color: colors.caramel },
-          { title: 'Total FD Balance', value: `₹${statsResponse.data.totalFd.toLocaleString()}`, icon: 'Building', color: colors.amaranth },
-          { title: 'Total RD Balance', value: `₹${statsResponse.data.totalRd.toLocaleString()}`, icon: 'ChartLine', color: colors.emerald },
-          { title: 'Total Loan Disbursed', value: `₹${statsResponse.data.totalLoans.toLocaleString()}`, icon: 'FileText', color: colors.vividTangerine }
-        ];
-        setStatsData(stats);
+
+        let stats;
+        if (user?.role === 'SUPER_ADMIN') {
+          // Aggregate RD, FD, and savings from users data for SUPER_ADMIN
+          const totalUsers = users.length;
+          const savingsUsers = users.filter(u => u.savingsCount > 0).length;
+          const totalSavings = users.reduce((sum, u) => sum + (u.totalSavingsBalance || 0), 0);
+          const rdUsers = users.filter(u => u.rdCount > 0).length;
+          const totalRd = users.reduce((sum, u) => sum + (u.totalRdBalance || 0), 0);
+          const fdUsers = users.filter(u => u.fdCount > 0).length;
+          const totalFd = users.reduce((sum, u) => sum + (u.totalFdBalance || 0), 0);
+
+          stats = [
+            { title: 'Total Customers', value: totalUsers, icon: 'Users', color: colors.airForceBlue },
+            { title: 'Total Savings', value: `Customers: ${savingsUsers}  Balance: ₹${totalSavings.toLocaleString()}`, icon: 'HandCoins', color: colors.caramel },
+            { title: 'Total FD', value: `Customers: ${fdUsers}  Balance: ₹${totalFd.toLocaleString()}`, icon: 'Building', color: colors.amaranth },
+            { title: 'Total RD', value: `Customers: ${rdUsers}  Balance: ₹${totalRd.toLocaleString()}`, icon: 'ChartLine', color: colors.emerald },
+            { title: 'Total Loan Disbursed', value: `Customers: ${statsResponse.data.loanUsers}  Balance: ₹${statsResponse.data.totalLoans.toLocaleString()}`, icon: 'FileText', color: colors.vividTangerine }
+          ];
+          setStatsData(stats);
+          setCustomersData(users); // Set customersData from users for SUPER_ADMIN
+        } else {
+          // Use stats API response directly for non-SUPER_ADMIN roles
+          stats = [
+            { title: 'Total Customers', value: statsResponse.data.totalUsers, icon: 'Users', color: colors.airForceBlue },
+            { title: 'Total Savings', value: `Customers: ${statsResponse.data.savingsUsers}  Balance: ₹${statsResponse.data.totalSavings.toLocaleString()}`, icon: 'HandCoins', color: colors.caramel },
+            { title: 'Total FD', value: `Customers: ${statsResponse.data.fdUsers}  Balance: ₹${statsResponse.data.totalFd.toLocaleString()}`, icon: 'Building', color: colors.amaranth },
+            { title: 'Total RD', value: `Customers: ${statsResponse.data.rdUsers}  Balance: ₹${statsResponse.data.totalRd.toLocaleString()}`, icon: 'ChartLine', color: colors.emerald },
+            { title: 'Total Loan Disbursed', value: `Customers: ${statsResponse.data.loanUsers}  Balance: ₹${statsResponse.data.totalLoans.toLocaleString()}`, icon: 'FileText', color: colors.vividTangerine }
+          ];
+          setStatsData(stats);
+
+          // Fetch recent customers for non-SUPER_ADMIN
+          const customersResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/recent-customers', {
+            params: { branchName: user.branchName, role: user.role }
+          });
+          setCustomersData(customersResponse.data);
+        }
 
         // Fetch account trends (LineChart)
         const trendsResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/account-trends', {
-          params: { branchName: user.branchName }
+          params: { branchName: user.branchName, role: user.role }
         });
         setLineChartData(trendsResponse.data);
 
         // Fetch loan trends (BarChart)
         const loanTrendsResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/loan-trends', {
-          params: { branchName: user.branchName }
+          params: { branchName: user.branchName, role: user.role }
         });
         setLoanTrendsData(loanTrendsResponse.data);
 
         // Fetch loan types (DoughnutChart)
         const loanTypesResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/loan-types', {
-          params: { branchName: user.branchName }
+          params: { branchName: user.branchName, role: user.role }
         });
         setLoanTypesData(loanTypesResponse.data);
+        console.log("Loan types api called :", loanTypesResponse.data );
 
         // Fetch account distribution (PieChart)
         const distributionResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/account-distribution', {
-          params: { branchName: user.branchName }
+          params: { branchName: user.branchName, role: user.role }
         });
         setPieChartData(distributionResponse.data);
-
-        // Fetch recent customers
-        const customersResponse = await axios.get('https://api.ojalmsfoundation.in/api/dashboard/recent-customers', {
-          params: { branchName: user.branchName }
-        });
-        setCustomersData(customersResponse.data);
       } catch (err) {
         setError('Failed to fetch dashboard data');
         console.error(err);
@@ -85,7 +111,7 @@ function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [user?.branchName]);
+  }, [user?.branchName, user?.role, users]);
 
   if (loading) return (
     <div className="flex justify-center items-center min-h-[300px]">
@@ -119,7 +145,7 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-800 ">Dashboard</h1>
+      <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
       
       {/* Stat Cards */}
       <StatCards statCardsData={statsData} />
@@ -213,7 +239,7 @@ function Dashboard() {
       {/* Customers Table */}
       <CustomersTable customersData={customersData} />
       <div className="border-t border-gray-300 text-center py-4 text-sm text-gray-600">
-        © {new Date().getFullYear()} Ojal Finance. All Rights Reserved | Developed by Kunash Media Solutions.
+        © {new Date().getFullYear()} Ojal MSF. All Rights Reserved | Developed by Kunash Media Solutions.
       </div>
     </div>
   );

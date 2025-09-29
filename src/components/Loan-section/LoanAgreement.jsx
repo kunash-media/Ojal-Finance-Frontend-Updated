@@ -34,17 +34,7 @@ const SuccessPopup = ({ onClose }) => {
 const LoanAgreement = ({ formData, onAgree, isAgreed }) => {
   return (
     <div className="mt-6 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-8 border border-yellow-200 shadow-lg">
-      {/* <div className="text-center mb-6">
-        <div className="flex items-center justify-center mb-4">
-          <img src="https://via.placeholder.com/80x80/0066cc/ffffff?text=OJAL" alt="Company Logo" className="w-16 h-16 rounded-full mr-4" />
-          <div>
-            <h1 className="text-2xl font-bold text-blue-800">OJAL MICRO FINANCE</h1>
-            <p className="text-sm text-gray-600">CIN: U88900PN2023NPL219300</p>
-          </div>
-        </div>
-        <h2 className="text-xl font-bold text-yellow-800 underline">LOAN AGREEMENT</h2>
-      </div> */}
-
+     
       <div className="text-sm text-gray-700 space-y-4 leading-relaxed">
         <div className="bg-white p-4 rounded-lg border border-yellow-200">
           <p className="mb-2 text-center" >
@@ -232,7 +222,7 @@ const LoanApplicationForm = () => {
   const [formData, setFormData] = useState({
     applicationNo: '',
     purposeOfLoan: '',
-    loanScheme: '',
+    loanScheme: 'Arth Sahayya',
     loanAmount: '',
     roi: '',
     appliedDate: new Date().toISOString().split('T')[0],
@@ -297,20 +287,55 @@ const LoanApplicationForm = () => {
     calculateEMI();
   }, [formData.loanAmount, formData.roi, formData.tenure]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
 
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+  //--------- input change validation ----------------//
+  const handleInputChange = (e) => {
+  const { name, value } = e.target;
+  
+  let processedValue = value;
+  
+  // Special handling for mobile number fields
+  if (name === 'mobile' || name === "grantorMobile" || name === "nomineeMobile") {
+    // Remove non-digit characters and limit to 10 digits
+    processedValue = value.replace(/\D/g, '').slice(0, 10);
+  }
+  else if (name === 'panNumber') {
+    // PAN: Allow only alphanumeric, convert to uppercase, limit to 10 characters
+    processedValue = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 10);
+  } 
+  else if (name === 'adhaarNumber') {
+    // Aadhaar: Allow only digits and add space formatting (XXXX XXXX XXXX)
+    const numbersOnly = value.replace(/\D/g, '').slice(0, 12);
+    if (numbersOnly.length > 0) {
+      // Format as XXXX XXXX XXXX
+      const parts = [];
+      for (let i = 0; i < numbersOnly.length; i += 4) {
+        parts.push(numbersOnly.slice(i, i + 4));
+      }
+      processedValue = parts.join(' ');
+    } else {
+      processedValue = numbersOnly;
     }
-  };
+  }
+  
+  setFormData(prev => ({
+    ...prev,
+    [name]: processedValue
+  }));
+
+  // Clear error for this field when user starts typing
+  if (errors[name]) {
+    setErrors(prev => ({
+      ...prev,
+      [name]: ''
+    }));
+  }
+  // Optional: Real-time validation for mobile (you can remove this if you prefer validation on submit only)
+  // if (name === 'mobile' && processedValue.length > 0) {
+  //   validateMobileField(processedValue);
+  // }
+};
+  
 
 
   const calculateEMI = () => {
@@ -1375,9 +1400,10 @@ const LoanApplicationForm = () => {
     }
   };
 
-  //------- handle submit function  ----------------//
 
-   const handleSubmit = async (e) => {
+//=========== handle submit function  =============//
+
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   // Validate all required steps
@@ -1451,7 +1477,13 @@ const LoanApplicationForm = () => {
     });
 
     if (!response.ok) {
-      throw new Error('Submission failed');
+    // Check if it's a 409 Conflict error
+      if (response.status === 409) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Application submitted already!');
+      } else {
+        throw new Error('Submission failed');
+      }
     }
 
     toast.success('Loan application submitted successfully!');
@@ -1462,13 +1494,26 @@ const LoanApplicationForm = () => {
     // Show success popup
     setShowSuccessPopup(true);
     console.log("form data payload :", formData);
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error submitting application:', error);
-    toast.error('Error submitting application. Please try again.');
-  } finally {
+    
+    // Check if error response contains the custom message
+    let errorMessage = 'Error submitting application. Please try again.';
+    
+    if (error.message === 'Application submitted already!') {
+      errorMessage = 'Application submitted already!';
+    } else if (error.response?.data?.error) {
+      errorMessage = error.response.data.error;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    toast.error(errorMessage);
+  } 
+  finally {
     setIsSubmitting(false);
   }
-};
+}
 
  //---------------------------------------------------------//
 
@@ -1530,19 +1575,7 @@ const LoanApplicationForm = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Application No *</label>
-                  <input
-                    type="text"
-                    name="applicationNo"
-                    value={formData.applicationNo}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                    placeholder="Enter application number"
-                  />
-                  {errors.applicationNo && <p className="text-red-500 text-xs mt-1">{errors.applicationNo}</p>}
-                </div> */}
-
+              
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Purpose of Loan</label>
                   <select
@@ -1554,7 +1587,8 @@ const LoanApplicationForm = () => {
                     <option value="">Select</option>
                     <option value="Business Loan">Business Loan</option>
                     <option value="Personal Loan">Personal Loan</option>
-                    <option value="Home Loan">Home Loan</option>
+                    <option value="Micro Loan">Micro Loan</option>
+                    <option value="Group Loan">Group Loan</option>
                   </select>
                 </div>
 
@@ -1654,19 +1688,7 @@ const LoanApplicationForm = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Member No *</label>
-                  <input
-                    type="text"
-                    name="memberNo"
-                    value={formData.memberNo}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter member number"
-                  />
-                  {errors.memberNo && <p className="text-red-500 text-xs mt-1">{errors.memberNo}</p>}
-                </div> */}
-
+            
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Member Name *</label>
                   <input
@@ -1693,19 +1715,21 @@ const LoanApplicationForm = () => {
                   {errors.fatherName && <p className="text-red-500 text-xs mt-1">{errors.fatherName}</p>}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile No *</label>
-                  <input
-                    type="tel"
-                    name="mobile"
-                    value={formData.mobile}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter 10-digit mobile number"
-                    maxLength="10"
-                  />
-                  {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
-                </div>
+               <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile No *</label>
+                <input
+                  type="tel"
+                  name="mobile"
+                  value={formData.mobile}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter 10-digit mobile number"
+                  maxLength="10"
+                  pattern="[0-9]{10}"
+                  title="Please enter exactly 10 digits"
+                />
+                {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
+              </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Date of Joining *</label>
@@ -1767,20 +1791,26 @@ const LoanApplicationForm = () => {
                     value={formData.panNumber}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter Pan Number"
+                    placeholder="Enter PAN Number (e.g., ABCDE1234F)"
+                    maxLength="10"
+                    style={{ textTransform: 'uppercase' }}
                   />
+                  {errors.panNumber && <p className="text-red-500 text-xs mt-1">{errors.panNumber}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Adhaar Number *</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Aadhaar Number *</label>
                   <input
                     type="text"
                     name="adhaarNumber"
                     value={formData.adhaarNumber}
                     onChange={handleInputChange}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter Adhaar Number"
+                    placeholder="Enter Aadhaar Number (e.g., 1234 5678 9012)"
+                    maxLength="14"
+                    inputMode="numeric"
                   />
+                  {errors.adhaarNumber && <p className="text-red-500 text-xs mt-1">{errors.adhaarNumber}</p>}
                 </div>
 
               </div>
@@ -1848,7 +1878,10 @@ const LoanApplicationForm = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Grantor Mobile Number *</label>
                   <input
-                    type="text"
+                    type="tel"
+                    maxLength="10"
+                    pattern="[0-9]{10}"
+                    inputMode="numeric"
                     name="grantorMobile"
                     value={formData.grantorMobile}
                     onChange={handleInputChange}
@@ -1861,7 +1894,10 @@ const LoanApplicationForm = () => {
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Nominee Mobile Number *</label>
                   <input
-                    type="text"
+                    type="tel"
+                    maxLength="10"
+                    pattern="[0-9]{10}"
+                    inputMode="numeric"
                     name="nomineeMobile"
                     value={formData.nomineeMobile}
                     onChange={handleInputChange}

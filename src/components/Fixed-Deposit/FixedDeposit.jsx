@@ -736,6 +736,7 @@ const FixedDeposit = () => {
                   name="principalAmount"
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={fdFormData.principalAmount}
+                  placeholder="Enter Principal Amount"
                   onChange={handleFdFormChange}
                   required
                   min="1000"
@@ -751,6 +752,7 @@ const FixedDeposit = () => {
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={fdFormData.interestRate}
                   onChange={handleFdFormChange}
+                  placeholder="Enter ROI %"
                   required
                   min="1"
                   max="15"
@@ -765,6 +767,7 @@ const FixedDeposit = () => {
                   name="tenureMonths"
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={fdFormData.tenureMonths}
+                  placeholder="Enter Tenure Months"
                   onChange={handleFdFormChange}
                   required
                   min="1"
@@ -786,6 +789,7 @@ const FixedDeposit = () => {
                   {currentFdAccountStatus ? 'Update' : 'Submit'}
                 </button>
               </div>
+              
             </form>
           </div>
         </div>

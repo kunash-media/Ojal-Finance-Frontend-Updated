@@ -188,6 +188,9 @@ const AddCustomerForm = () => {
                 // Show success toast notification
                 showToastNotification('Customer registered successfully!', 'success');
 
+                // Refresh the page to ensure other components reflect the new entry
+                window.location.reload();
+
                 // Reset form after successful submission
                 resetForm();
             } else {

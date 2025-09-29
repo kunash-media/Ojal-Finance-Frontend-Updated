@@ -80,7 +80,7 @@ function LoginForm() {
       style={{ background: 'linear-gradient(to bottom, rgba(5, 102, 94, 0.8), rgba(4, 78, 71, 0.95))' }}
     >
       <Toaster position="top-right" richColors />
-      <div className="flex w-half max-w-4xl flex-col items-center gap-5 rounded-2xl bg-white p-5 shadow-3xl md:flex-row">
+      <div className="flex w-full max-w-4xl flex-col items-center gap-5 rounded-2xl bg-white p-5 shadow-3xl md:flex-row">
         <div className="flex flex-col items-center gap-4">
           {/* Logo - adjust height class (h-24, h-32, h-40, etc.) as needed */}
           <div className=''>
@@ -110,11 +110,11 @@ function LoginForm() {
               <span className="text-[#265f5c] font-medium">Welcome! </span>
               <TypeAnimation
                 sequence={[
-                  'back to ojal finance.',
+                  'back to OJAL MSF Services.',
                   2000,
                   '',
                   500,
-                  'back to ojal finance.',
+                  'back to OJAL MSF Services.',
                   2000
                 ]}
                 wrapper="span"

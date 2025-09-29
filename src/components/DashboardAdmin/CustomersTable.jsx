@@ -1,4 +1,5 @@
 function CustomersTable({ customersData }) {
+
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6 border-b border-gray-200 ">
@@ -19,8 +20,8 @@ function CustomersTable({ customersData }) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200 ">
             {customersData.map((customer) => (
-              <tr key={customer.id} className="hover:bg-gray-50 ">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{customer.id}</td>
+              <tr key={customer.userId} className="hover:bg-gray-50 ">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{customer.userId}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="font-medium text-gray-900 ">{customer.name}</div>
                 </td>

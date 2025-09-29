@@ -816,6 +816,7 @@ function CreateSaving() {
                   step="0.01"
                   min="0"
                   max="100"
+                  placeholder='Enter ROI %'
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={savingData.interestRate}
                   onChange={handleInputChange}
@@ -829,6 +830,7 @@ function CreateSaving() {
                   name="minimumBalance"
                   step="0.01"
                   min="0"
+                  placeholder='Enter Minimum Balance Above 100'
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={savingData.minimumBalance}
                   onChange={handleInputChange}
@@ -842,11 +844,13 @@ function CreateSaving() {
                   name="initialDeposit"
                   step="0.01"
                   min="0"
+                  placeholder='Enter Initial Deposit'
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={savingData.initialDeposit}
                   onChange={handleInputChange}
                   required
                 />
+                <p className='mt-4'>Note : <span className='text-red-500'>Initial deposit must be greater than minimum balance.</span></p>
               </div>
               <div className="flex justify-end gap-2">
                 <button

@@ -18,8 +18,8 @@ function StatCards({ statCardsData }) {
           className="bg-white rounded-lg shadow p-6 flex items-center justify-between"
         >
           <div>
-            <p className="text-sm font-medium text-gray-500">{card.title}</p>
-            <p className="text-2xl font-semibold text-gray-800">{card.value}</p>
+            <p className="text-lg font-medium text-gray-500">{card.title}</p>
+            <p className="text-md font-semibold text-gray-800">{card.value}</p>
           </div>
           <div 
             className="p-3 rounded-full" 

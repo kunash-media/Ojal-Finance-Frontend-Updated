@@ -33,6 +33,7 @@ export const UserProvider = ({ children }) => {
           'https://api.ojalmsfoundation.in/api/users/get-all-users',
           { params: { role } }
         );
+        console.log("SUPER ADMIN GET ALL CALLED :", response.data);
       } else {
         // Call the branch-specific API for other roles
         response = await axios.get(

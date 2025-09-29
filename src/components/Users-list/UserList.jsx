@@ -158,7 +158,7 @@ const UserList = () => {
             <div className="bg-white rounded-lg shadow-sm p-3 mb-4 border border-gray-300">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <h1 className="text-xl font-bold text-gray-800">All Customers ({users?.length})</h1>
-                    <button 
+                    <button
                         onClick={() => setShowExportConfirmation(true)}
                         className="px-4 py-2 bg-purple-800 text-white rounded-md hover:bg-purple-500 text-sm font-medium"
                     >
@@ -262,7 +262,7 @@ const UserList = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap bg-white text-sm font-medium"
-                                            style={{ position: 'sticky', right:0 }}>
+                                            style={{ position: 'sticky', right: 0 }}>
                                             <button
                                                 onClick={() => handleViewProfile(user)}
                                                 className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -341,8 +341,8 @@ const UserList = () => {
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-600">Role</label>
                                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1 ${selectedUser.role === 'ROLE_ADMIN'
-                                                        ? 'bg-purple-100 text-purple-800'
-                                                        : 'bg-green-100 text-green-800'
+                                                    ? 'bg-purple-100 text-purple-800'
+                                                    : 'bg-green-100 text-green-800'
                                                     }`}>
                                                     {selectedUser.role.replace('ROLE_', '')}
                                                 </span>
@@ -356,10 +356,18 @@ const UserList = () => {
                                     </div>
                                     <div>
                                         <h3 className="text-lg font-medium text-gray-800 mb-4 border-b pb-2">User Accounts</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-600">User ID</label>
-                                                <p className="mt-1 text-sm text-gray-900 font-mono">{selectedUser.userId}</p>
+                                        <div className="space-y-4" >
+                                            <label className="block text-sm font-medium text-gray-600">Savings Accounts :</label>
+                                            <div className="flex items-center justify-between p-1 bg-gray-50 border border-gray-200 rounded ">
+                                                <p className="mt-1 text-sm text-gray-900 font-mono"> Total Saving A/C: {selectedUser.savingsCount} | Total Balance : ₹{selectedUser.totalSavingsBalance.toLocaleString()}</p>
+                                            </div>
+                                            <label className="block text-sm font-medium text-gray-600">Recurring Deposits (RD) :</label>
+                                            <div className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded">
+                                                <p className="mt-1 text-sm text-gray-900 font-mono"> Total RDs A/C: {selectedUser.rdCount} | Total Balance : ₹{selectedUser.totalRdBalance.toLocaleString()}</p>
+                                            </div>
+                                            <label className="block text-sm font-medium text-gray-600">Fixed Deposits (FD) :</label>
+                                            <div className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded">
+                                                <p className="mt-1 text-sm text-gray-900 font-mono"> Total FDs A/C : {selectedUser.fdCount} | Total Balance : ₹{selectedUser.totalFdBalance.toLocaleString()}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -435,14 +443,15 @@ const UserList = () => {
                                                         {doc.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                                                     </span>
                                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${status
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : 'bg-red-100 text-red-800'
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-red-100 text-red-800'
                                                         }`}>
                                                         {status ? 'Verified' : 'Pending'}
                                                     </span>
                                                 </div>
                                             ))}
                                         </div>
+
                                     </div>
                                 </div>
                             </div>

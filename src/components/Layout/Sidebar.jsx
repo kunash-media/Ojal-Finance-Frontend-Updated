@@ -60,7 +60,7 @@ function Sidebar({ isOpen, toggleSidebar }) {
             <img 
                 src="/src/assets/ojal-logo.png" 
                 alt="Ojal micro Finance" 
-                className="h-[70px] w-[75px] ml-12"/>
+                className="h-[74px] w-[75px] ml-12"/>
           </div>
         )}
         <button 

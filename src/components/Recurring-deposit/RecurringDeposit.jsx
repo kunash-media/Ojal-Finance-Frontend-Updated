@@ -914,6 +914,7 @@ const RecurringDeposit = () => {
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={rdFormData.depositAmount}
                   onChange={handleRdFormChange}
+                  placeholder="Enter Deposit Amount"
                   required
                   min="100"
                   step="100"
@@ -928,6 +929,7 @@ const RecurringDeposit = () => {
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={rdFormData.interestRate}
                   onChange={handleRdFormChange}
+                  placeholder="Enter ROI %"
                   required
                   min="1"
                   max="10"
@@ -942,6 +944,7 @@ const RecurringDeposit = () => {
                   name="tenureMonths"
                   className="w-full p-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-teal-600 border-teal-600"
                   value={rdFormData.tenureMonths}
+                  placeholder="Enter Tenure Months"
                   onChange={handleRdFormChange}
                   required
                   min="6"
